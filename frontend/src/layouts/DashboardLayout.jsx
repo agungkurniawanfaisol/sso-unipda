@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '../components/dashboard/Sidebar'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 
 export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  useBodyScrollLock(mobileOpen)
 
   return (
     <div className="min-h-screen bg-[#050508]">

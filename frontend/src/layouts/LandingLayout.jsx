@@ -18,7 +18,7 @@ export default function LandingLayout({ children }) {
       <FloatingSearchButton />
       <div className="relative z-10">
         <Navbar variant="minimal" />
-        <main>{children}</main>
+        <main className="pb-24">{children}</main>
         <Footer variant="minimal" />
       </div>
     </div>

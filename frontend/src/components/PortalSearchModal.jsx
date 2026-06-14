@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api'
 import { prefetch, cacheKey } from '@/lib/apiCache'
 import { usePortalSearch } from '@/providers/PortalSearchProvider'
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock'
 
 const APP_ICONS = {
   'acanova-office': Building2,
@@ -41,6 +42,8 @@ export function PortalSearchModal({ open, onClose }) {
     )
   }, [apps, query])
 
+  useBodyScrollLock(open)
+
   return (
     <AnimatePresence>
       {open ? (
@@ -48,7 +51,7 @@ export function PortalSearchModal({ open, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 px-4 pt-[12vh] backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-[max(10vh,env(safe-area-inset-top,0px))] backdrop-blur-md sm:pt-[12vh]"
           onClick={onClose}
         >
           <motion.div
@@ -74,7 +77,7 @@ export function PortalSearchModal({ open, onClose }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="cursor-pointer rounded-lg p-1 text-white/40 hover:text-white"
+                  className="inline-flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/40 hover:text-white"
                   aria-label="Tutup pencarian"
                 >
                   <X className="h-4 w-4" />

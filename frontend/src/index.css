@@ -192,16 +192,29 @@
   flex: 0 0 min(70vw, 720px);
 }
 
+.horizontal-reel--stack .horizontal-reel-item {
+  scroll-snap-align: unset;
+}
+
 @media (max-width: 768px) {
   .horizontal-reel {
-    flex-direction: column;
-    overflow-x: visible;
-    scroll-snap-type: none;
-    align-items: stretch;
+    scroll-padding-inline: 1.25rem;
     gap: 1rem;
   }
 
   .horizontal-reel-item {
+    flex: 0 0 min(78vw, 300px);
+    scroll-snap-align: center;
+  }
+
+  .horizontal-reel--stack {
+    flex-direction: column;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    align-items: stretch;
+  }
+
+  .horizontal-reel--stack .horizontal-reel-item {
     flex: 1 1 auto;
     width: 100%;
     max-width: 100%;

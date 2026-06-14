@@ -10,6 +10,8 @@ import { prefetch, cacheKey } from '@/lib/apiCache'
 import { LecturerCard } from '@/components/lecturers/LecturerCard'
 import { FACULTY_TABS } from '@/components/lecturers/lecturerShared'
 
+const PREVIEW_LIMIT = 8
+
 export default function LecturerDirectory() {
   const [activeFaculty, setActiveFaculty] = useState('saintek')
   const activeTab = FACULTY_TABS.find((tab) => tab.id === activeFaculty) ?? FACULTY_TABS[0]
@@ -25,8 +27,8 @@ export default function LecturerDirectory() {
     [activeFaculty],
     { cacheKey: lecturerCacheKey }
   )
-  const lecturers = data?.data ?? []
-  const total = data?.meta?.total ?? lecturers.length
+  const lecturers = (data?.data ?? []).slice(0, PREVIEW_LIMIT)
+  const total = data?.meta?.total ?? data?.data?.length ?? lecturers.length
 
   useEffect(() => {
     FACULTY_TABS.forEach((tab) => {
@@ -90,8 +92,8 @@ export default function LecturerDirectory() {
 
         {!loading && !error && (
           <p className="mb-6 text-sm text-white/40">
-            Menampilkan <span className="font-semibold text-white/70">{total}</span> dosen —{' '}
-            {activeTab.title}
+            Pratinjau <span className="font-semibold text-white/70">{lecturers.length}</span> dari{' '}
+            <span className="font-semibold text-white/70">{total}</span> dosen — {activeTab.title}
           </p>
         )}
 

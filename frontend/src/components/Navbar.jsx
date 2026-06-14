@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, X, GraduationCap, ArrowUpRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScrollPosition } from '../hooks/useScrollPosition'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { cn } from '@/lib/utils'
 import { PortalSearch } from './PortalSearch'
 
@@ -25,6 +26,8 @@ export default function Navbar({ variant = 'default' }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const reducedMotion = usePrefersReducedMotion()
   const activeId = useScrollSpy(navLinks.map((link) => link.id))
+
+  useBodyScrollLock(mobileOpen)
 
   return (
     <header
@@ -122,7 +125,7 @@ export default function Navbar({ variant = 'default' }) {
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="shrink-0 cursor-pointer rounded-lg p-2 text-white/80 transition-colors hover:bg-white/5 hover:text-white md:hidden"
+            className="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-white/5 hover:text-white md:hidden"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

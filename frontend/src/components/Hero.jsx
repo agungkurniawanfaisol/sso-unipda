@@ -248,7 +248,7 @@ export default function Hero() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2 md:overflow-visible md:pb-0"
+                  className="max-md:flex-none md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:pb-0"
                 >
                   <RotatingServiceHint className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35" />
                   <AppLauncherGrid />

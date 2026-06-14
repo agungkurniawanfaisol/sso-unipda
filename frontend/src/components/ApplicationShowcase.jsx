@@ -129,7 +129,7 @@ export default function ApplicationShowcase() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <div ref={reelRef} className="horizontal-reel pb-4">
+              <div ref={reelRef} className="horizontal-reel horizontal-reel--stack pb-4">
                 {applications.map((app, index) => {
                   const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length]
                   const AppIcon = getAppIcon(app.id)

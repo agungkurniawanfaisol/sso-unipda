@@ -81,7 +81,7 @@ function GalleryLightbox({ item, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:text-white"
+          className="absolute right-3 top-3 z-10 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:text-white"
           aria-label="Tutup"
         >
           <X className="h-4 w-4" />

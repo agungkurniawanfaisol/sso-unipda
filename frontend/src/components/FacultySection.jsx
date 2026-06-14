@@ -68,6 +68,7 @@ export default function FacultySection() {
               return (
                 <motion.article
                   key={faculty.id}
+                  onClick={() => setHoveredId(hoveredId === faculty.id ? null : faculty.id)}
                   onMouseEnter={() => setHoveredId(faculty.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   animate={
@@ -115,10 +116,23 @@ export default function FacultySection() {
                     </h3>
                     <p className="text-editorial mt-4 max-w-md text-white/50">{faculty.description}</p>
 
+                    {faculty.programs?.length > 0 && (
+                      <div className="mt-6 flex flex-wrap gap-2 md:hidden">
+                        {faculty.programs.map((program) => (
+                          <span
+                            key={program}
+                            className="rounded-lg border border-white/[0.06] bg-black/20 px-2.5 py-1 text-[11px] text-white/55"
+                          >
+                            {program}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     <motion.div
                       initial={false}
                       animate={{ height: isActive ? 'auto' : 0, opacity: isActive ? 1 : 0 }}
-                      className="overflow-hidden"
+                      className="hidden overflow-hidden md:block"
                     >
                       {faculty.programs?.length > 0 && (
                         <div className="mt-6 flex flex-wrap gap-2">

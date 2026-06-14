@@ -91,20 +91,20 @@ export default function AllStudentsPage() {
           </div>
 
           {lastPage > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-3">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <button
                 type="button"
                 disabled={currentPage <= 1}
                 onClick={() => setPage((value) => Math.max(1, value - 1))}
                 className={cn(
-                  'inline-flex cursor-pointer items-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                  'inline-flex min-h-11 cursor-pointer items-center justify-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
                   currentPage <= 1
                     ? 'cursor-not-allowed border-white/5 text-white/25'
                     : 'border-white/10 text-white/60 hover:border-white/20 hover:text-white'
                 )}
               >
                 <ChevronLeft className="h-4 w-4" />
-                Sebelumnya
+                <span className="max-sm:sr-only">Sebelumnya</span>
               </button>
               <span className="text-sm text-white/45">
                 {currentPage} / {lastPage}
@@ -114,13 +114,13 @@ export default function AllStudentsPage() {
                 disabled={currentPage >= lastPage}
                 onClick={() => setPage((value) => Math.min(lastPage, value + 1))}
                 className={cn(
-                  'inline-flex cursor-pointer items-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                  'inline-flex min-h-11 cursor-pointer items-center justify-center gap-1 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
                   currentPage >= lastPage
                     ? 'cursor-not-allowed border-white/5 text-white/25'
                     : 'border-white/10 text-white/60 hover:border-white/20 hover:text-white'
                 )}
               >
-                Selanjutnya
+                <span className="max-sm:sr-only">Selanjutnya</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>

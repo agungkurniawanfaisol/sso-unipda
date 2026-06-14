@@ -27,7 +27,7 @@ export function CampusLiveStatsStrip() {
   ]
 
   return (
-    <div className="mb-8 grid grid-cols-3 gap-2 sm:gap-3 md:max-w-md">
+    <div className="mb-8 grid grid-cols-3 gap-2 max-[360px]:grid-cols-1 sm:max-w-md sm:gap-3">
       {stats.map((stat) => (
         <div
           key={stat.label}
@@ -37,7 +37,7 @@ export function CampusLiveStatsStrip() {
           <div className="font-display text-lg font-semibold text-white">
             <AnimatedCounter value={stat.value} />
           </div>
-          <div className="text-[10px] uppercase tracking-wide text-white/35">{stat.label}</div>
+          <div className="text-[10px] uppercase tracking-wide text-white/35 sm:text-[11px]">{stat.label}</div>
         </div>
       ))}
     </div>

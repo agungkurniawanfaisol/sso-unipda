@@ -33,8 +33,8 @@ export function VisitorModeSwitcher({ className, compact = false }) {
             aria-selected={isActive}
             onClick={() => handleSelect(item.id)}
             className={cn(
-              'cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
-              compact ? 'px-2.5 py-1' : 'md:px-4',
+              'inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2.5 text-xs font-semibold transition-all sm:px-4',
+              compact ? 'min-h-10 px-3 py-2' : 'md:px-4',
               isActive
                 ? 'bg-white text-black shadow-sm'
                 : 'text-white/50 hover:text-white/80'
