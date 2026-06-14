@@ -21,8 +21,54 @@ const MODE_COPY = {
   dosen: 'Buka AcaNova Office, SIA, dan layanan SDM kampus.',
 }
 
-const BOOT_MS = 1200
+const BOOT_MS = 2000
 const SCENE_DWELL_MS = 2500
+
+function BootOverlay({ show }) {
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  return createPortal(
+    <AnimatePresence>
+      {show ? (
+        <motion.div
+          key="boot"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed inset-0 z-[200] flex min-h-dvh items-center justify-center bg-[#050508] px-6 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
+        >
+          <div className="flex w-full max-w-md flex-col items-center gap-4 text-center">
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mx-auto shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-white/40 sm:tracking-[0.28em]"
+            >
+              Unipda Portal
+            </motion.p>
+            <h2
+              className="font-display mx-auto max-w-full shrink-0 text-center text-[1.75rem] font-bold leading-snug text-white sm:text-4xl md:text-5xl"
+              style={{ textAlign: 'center' }}
+            >
+              Membuka pengalaman
+            </h2>
+            <div className="mx-auto h-px w-20 shrink-0 overflow-hidden bg-white/10">
+              <motion.div
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                className="h-full w-full bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent"
+              />
+            </div>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>,
+    document.body
+  )
+}
 
 const headlineContainer = {
   hidden: {},
@@ -155,44 +201,7 @@ export default function Hero() {
           Digital Campus · Live
         </div>
 
-        <AnimatePresence>
-          {showBoot &&
-            createPortal(
-              <motion.div
-                key="boot"
-                initial={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed inset-0 z-[100] flex min-h-dvh items-center justify-center bg-[#050508] px-6 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
-              >
-                <div className="flex w-full max-w-md flex-col items-center gap-4 text-center">
-                  <motion.p
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="mx-auto shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-white/40 sm:tracking-[0.28em]"
-                  >
-                    Unipda Portal
-                  </motion.p>
-                  <h2
-                    className="font-display mx-auto max-w-full shrink-0 text-center text-[1.75rem] font-bold leading-snug text-white sm:text-4xl md:text-5xl"
-                    style={{ textAlign: 'center' }}
-                  >
-                    Membuka pengalaman
-                  </h2>
-                  <div className="mx-auto h-px w-20 shrink-0 overflow-hidden bg-white/10">
-                    <motion.div
-                      initial={{ x: '-100%' }}
-                      animate={{ x: '100%' }}
-                      transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-                      className="h-full w-full bg-gradient-to-r from-transparent via-indigo-400/80 to-transparent"
-                    />
-                  </div>
-                </div>
-              </motion.div>,
-              document.body
-            )}
-        </AnimatePresence>
+        <BootOverlay show={showBoot} />
 
         <motion.div
           style={{ opacity: contentOpacity, y: contentY }}
