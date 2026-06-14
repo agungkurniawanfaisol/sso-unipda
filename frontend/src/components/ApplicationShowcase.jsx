@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Monitor,
@@ -34,6 +34,16 @@ export default function ApplicationShowcase() {
   const reelRef = useRef(null)
   const [activeCategory, setActiveCategory] = useState('all')
   const reducedMotion = usePrefersReducedMotion()
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
   const params = useMemo(
     () => (activeCategory === 'all' ? {} : { category: activeCategory }),
     [activeCategory]
@@ -44,7 +54,7 @@ export default function ApplicationShowcase() {
   const activeIndex = useHorizontalSpotlight(
     reelRef,
     applications.length,
-    !reducedMotion && applications.length > 0
+    !reducedMotion && !isMobile && applications.length > 0
   )
 
   return (
@@ -119,7 +129,7 @@ export default function ApplicationShowcase() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <div ref={reelRef} className="horizontal-reel -mx-6 px-6 pb-4 md:-mx-0 md:px-0">
+              <div ref={reelRef} className="horizontal-reel pb-4">
                 {applications.map((app, index) => {
                   const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length]
                   const AppIcon = getAppIcon(app.id)
@@ -131,7 +141,7 @@ export default function ApplicationShowcase() {
                       key={app.id ?? index}
                       data-reel-item
                       animate={
-                        reducedMotion
+                        reducedMotion || isMobile
                           ? undefined
                           : {
                               scale: isSpotlight ? 1.04 : 0.93,
@@ -143,7 +153,7 @@ export default function ApplicationShowcase() {
                       }
                       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
                       className={cn(
-                        'horizontal-reel-item group relative flex h-[min(70vh,520px)] flex-col overflow-hidden rounded-3xl border bg-white/[0.02] transition-shadow duration-500',
+                        'horizontal-reel-item group relative flex min-h-[300px] flex-col overflow-hidden rounded-3xl border bg-white/[0.02] transition-shadow duration-500 md:h-[min(70vh,520px)]',
                         isSpotlight
                           ? 'border-white/15 shadow-[0_24px_48px_rgba(0,0,0,0.35)]'
                           : 'border-white/[0.06]'

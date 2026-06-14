@@ -87,7 +87,7 @@ function HeroAppTile({ app, index, isPrimary }) {
       app={app}
       index={index}
       size="hero"
-      className="col-span-2 min-h-[168px] sm:col-span-2 lg:col-span-2 lg:row-span-2 lg:min-h-[260px]"
+      className="col-span-2 min-h-[148px] sm:col-span-2 sm:min-h-[168px] lg:col-span-2 lg:row-span-2 lg:min-h-[260px]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-black/25 backdrop-blur-md shadow-lg">
@@ -139,7 +139,7 @@ function FeaturedAppTile({ app, index }) {
       app={app}
       index={index}
       size="lg"
-      className="col-span-1 min-h-[132px] lg:min-h-[124px]"
+      className="col-span-1 min-h-[116px] sm:min-h-[132px] lg:min-h-[124px]"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-black/25 backdrop-blur-sm">
@@ -166,7 +166,7 @@ function CompactAppTile({ app, index }) {
       app={app}
       index={index}
       size="sm"
-      className="col-span-1 min-h-[100px]"
+      className="col-span-1 min-h-[92px] sm:min-h-[100px]"
     >
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-black/25 backdrop-blur-sm">
@@ -208,7 +208,7 @@ export default function AppLauncherGrid({ className }) {
   return (
     <div id="applications" className={cn('scroll-mt-24', className)}>
       {loading && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:grid-rows-2">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:grid-rows-2">
           <SkeletonTile className="col-span-2 min-h-[168px] lg:row-span-2 lg:min-h-[260px]" />
           <SkeletonTile className="min-h-[132px]" />
           <SkeletonTile className="min-h-[132px]" />
@@ -226,14 +226,14 @@ export default function AppLauncherGrid({ className }) {
 
       {!loading && applications.length > 0 && (
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:grid-rows-2">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:grid-rows-2">
             {heroApp && <HeroAppTile app={heroApp} index={0} isPrimary />}
             {featuredApps.map((app, index) => (
               <FeaturedAppTile key={app.id ?? index} app={app} index={index + 1} />
             ))}
           </div>
           {compactApps.length > 0 && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
               {compactApps.map((app, index) => (
                 <CompactAppTile key={app.id ?? index} app={app} index={index + 3} />
               ))}

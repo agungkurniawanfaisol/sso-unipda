@@ -105,7 +105,7 @@ export default function Hero() {
       id="intro"
       className="chapter-accent-intro relative h-[150svh]"
     >
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
+        <div className="sticky top-0 h-[100svh] overflow-x-hidden overflow-y-auto md:overflow-hidden">
         <div className="hero-aurora hero-aurora-animated pointer-events-none absolute inset-0 z-[1]" aria-hidden="true" />
         <FloatingOrbs className="z-[2] opacity-50" />
 
@@ -161,13 +161,13 @@ export default function Hero() {
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#050508]"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#050508] px-6 text-center"
             >
               <motion.p
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="text-xs font-semibold uppercase tracking-[0.28em] text-white/40"
+                className="w-full text-xs font-semibold uppercase tracking-[0.28em] text-white/40"
               >
                 Unipda Portal
               </motion.p>
@@ -175,11 +175,11 @@ export default function Hero() {
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.12, duration: 0.75 }}
-                className="font-display mt-4 text-4xl font-bold text-white md:text-5xl"
+                className="font-display mx-auto mt-4 max-w-[16ch] text-3xl font-bold leading-tight text-white sm:max-w-none sm:text-4xl md:text-5xl"
               >
                 Membuka pengalaman
               </motion.h2>
-              <div className="mt-8 h-px w-20 overflow-hidden bg-white/10">
+              <div className="mx-auto mt-8 h-px w-20 overflow-hidden bg-white/10">
                 <motion.div
                   initial={{ x: '-100%' }}
                   animate={{ x: '100%' }}
@@ -202,7 +202,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="flex h-full flex-col"
+                className="flex h-full min-h-0 flex-col"
               >
                 <motion.div
                   variants={headlineContainer}
@@ -248,7 +248,7 @@ export default function Hero() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex-1"
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2 md:overflow-visible md:pb-0"
                 >
                   <RotatingServiceHint className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35" />
                   <AppLauncherGrid />
@@ -258,7 +258,7 @@ export default function Hero() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.45 }}
-                  className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5"
+                  className="mt-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4 md:mt-5 md:pt-5"
                 >
                   <MagneticButton
                     type="button"
