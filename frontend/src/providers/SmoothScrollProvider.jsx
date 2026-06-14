@@ -55,8 +55,9 @@ export function SmoothScrollProvider({ children }) {
     frame = requestAnimationFrame(raf)
 
     const onScroll = (lenis) => {
-      setProgress(lenis.progress ?? (lenis.limit > 0 ? lenis.scroll / lenis.limit : 0))
-      window.dispatchEvent(new Event('scroll'))
+      const next =
+        lenis.progress ?? (lenis.limit > 0 ? lenis.scroll / lenis.limit : 0)
+      setProgress((current) => (current === next ? current : next))
     }
     lenis.on('scroll', onScroll)
     onScroll(lenis)
@@ -75,7 +76,8 @@ export function SmoothScrollProvider({ children }) {
 
     const onScroll = () => {
       const limit = document.documentElement.scrollHeight - window.innerHeight
-      setProgress(limit > 0 ? window.scrollY / limit : 0)
+      const next = limit > 0 ? window.scrollY / limit : 0
+      setProgress((current) => (current === next ? current : next))
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })

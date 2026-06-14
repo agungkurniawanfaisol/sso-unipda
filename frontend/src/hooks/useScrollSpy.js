@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { useLenis } from '@/providers/SmoothScrollProvider'
 
 export function useScrollSpy(sectionIds, rootMargin = '-42% 0px -42% 0px') {
   const idsKey = useMemo(() => sectionIds.join(','), [sectionIds])
-  const [activeId, setActiveId] = useState(sectionIds[0] ?? '')
-  const { lenis } = useLenis()
+  const stableIds = useMemo(() => sectionIds, [idsKey])
+  const [activeId, setActiveId] = useState(stableIds[0] ?? '')
 
   const updateActive = useCallback(() => {
     const viewportCenter = window.innerHeight * 0.42
-    let bestId = sectionIds[0]
+    let bestId = stableIds[0]
     let bestDistance = Number.POSITIVE_INFINITY
 
-    for (const id of sectionIds) {
+    for (const id of stableIds) {
       const section = document.getElementById(id)
       if (!section) {
         continue
@@ -27,11 +26,11 @@ export function useScrollSpy(sectionIds, rootMargin = '-42% 0px -42% 0px') {
       }
     }
 
-    setActiveId(bestId)
-  }, [sectionIds])
+    setActiveId((current) => (current === bestId ? current : bestId))
+  }, [stableIds])
 
   useEffect(() => {
-    const sections = sectionIds
+    const sections = stableIds
       .map((id) => document.getElementById(id))
       .filter(Boolean)
 
@@ -47,10 +46,10 @@ export function useScrollSpy(sectionIds, rootMargin = '-42% 0px -42% 0px') {
           ratios.set(entry.target.id, entry.intersectionRatio)
         })
 
-        let bestId = sectionIds[0]
+        let bestId = stableIds[0]
         let bestRatio = 0
 
-        for (const id of sectionIds) {
+        for (const id of stableIds) {
           const ratio = ratios.get(id) ?? 0
           if (ratio > bestRatio) {
             bestRatio = ratio
@@ -59,7 +58,7 @@ export function useScrollSpy(sectionIds, rootMargin = '-42% 0px -42% 0px') {
         }
 
         if (bestRatio > 0) {
-          setActiveId(bestId)
+          setActiveId((current) => (current === bestId ? current : bestId))
         } else {
           updateActive()
         }
@@ -81,7 +80,7 @@ export function useScrollSpy(sectionIds, rootMargin = '-42% 0px -42% 0px') {
       window.removeEventListener('scroll', updateActive)
       window.removeEventListener('resize', updateActive)
     }
-  }, [idsKey, rootMargin, sectionIds, updateActive, lenis])
+  }, [idsKey, rootMargin, stableIds, updateActive])
 
   return activeId
 }

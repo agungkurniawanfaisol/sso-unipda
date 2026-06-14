@@ -55,22 +55,24 @@ function AppTileBase({ app, index, className, children, size = 'md' }) {
       whileHover={reducedMotion ? undefined : { y: -4, scale: 1.01 }}
       transition={{ type: 'spring', stiffness: 340, damping: 26 }}
       className={cn(
-        'group relative flex overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a12] ring-1 ring-white/5 transition-all duration-300',
+        'group relative isolate flex rounded-2xl border border-white/10 bg-[#0a0a12] ring-1 ring-white/5 transition-all duration-300',
         theme.glow,
         theme.ring,
         className
       )}
     >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
       <div
         className={cn(
-          'pointer-events-none absolute inset-0 bg-gradient-to-br opacity-90 transition-opacity duration-300 group-hover:opacity-100',
+          'absolute inset-0 bg-gradient-to-br opacity-90 transition-opacity duration-300 group-hover:opacity-100',
           theme.gradient
         )}
       />
-      <div className="pointer-events-none absolute -right-4 -top-4 opacity-[0.12] transition-transform duration-500 group-hover:scale-110 group-hover:opacity-[0.18]">
-        <AppIcon className={cn(size === 'hero' ? 'h-36 w-36' : size === 'lg' ? 'h-24 w-24' : 'h-16 w-16')} />
+      <div className="absolute -right-2 -top-2 opacity-[0.12] transition-transform duration-500 group-hover:scale-110 group-hover:opacity-[0.18] sm:-right-4 sm:-top-4">
+        <AppIcon className={cn(size === 'hero' ? 'h-28 w-28 sm:h-36 sm:w-36' : size === 'lg' ? 'h-20 w-20 sm:h-24 sm:w-24' : 'h-14 w-14 sm:h-16 sm:w-16')} />
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/20 to-transparent" />
+      </div>
 
       <div className="relative flex h-full w-full flex-col p-4 md:p-5">{children}</div>
     </motion.a>
@@ -87,7 +89,7 @@ function HeroAppTile({ app, index, isPrimary }) {
       app={app}
       index={index}
       size="hero"
-      className="col-span-2 min-h-[148px] sm:col-span-2 sm:min-h-[168px] lg:col-span-2 lg:row-span-2 lg:min-h-[260px]"
+      className="col-span-2 min-h-[180px] sm:col-span-2 sm:min-h-[168px] lg:col-span-2 lg:row-span-2 lg:min-h-[260px]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-black/25 backdrop-blur-md shadow-lg">
@@ -166,14 +168,14 @@ function CompactAppTile({ app, index }) {
       app={app}
       index={index}
       size="sm"
-      className="col-span-1 min-h-[92px] sm:min-h-[100px]"
+      className="col-span-1 min-h-[100px] sm:min-h-[108px]"
     >
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-black/25 backdrop-blur-sm">
           <AppIcon className="h-4 w-4 text-white/85" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-display truncate text-sm font-semibold text-white">{app.title}</h3>
+          <h3 className="font-display line-clamp-2 text-sm font-semibold leading-snug text-white">{app.title}</h3>
           <span className="mt-0.5 inline-flex items-center gap-0.5 text-[10px] font-medium text-white/50 group-hover:text-white/80">
             Buka
             <ArrowUpRight className="h-2.5 w-2.5" />

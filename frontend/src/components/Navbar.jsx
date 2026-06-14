@@ -20,12 +20,14 @@ const navLinks = [
   { label: 'Tentang', href: '#about', id: 'about' },
 ]
 
+const navSectionIds = navLinks.map((link) => link.id)
+
 export default function Navbar({ variant = 'default' }) {
   const isMinimal = variant === 'minimal'
   const scrolled = useScrollPosition(isMinimal ? 48 : 24)
   const [mobileOpen, setMobileOpen] = useState(false)
   const reducedMotion = usePrefersReducedMotion()
-  const activeId = useScrollSpy(navLinks.map((link) => link.id))
+  const activeId = useScrollSpy(navSectionIds)
 
   useBodyScrollLock(mobileOpen)
 
