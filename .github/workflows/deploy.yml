@@ -29,11 +29,12 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       # Hostinger sering memblokir SSH dari IP GitHub Actions → pakai FTP/FTPS
-      - name: Validate FTP host DNS
+      - name: Normalize FTP host
+        id: ftp_host
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
         run: |
-          HOST="${FTP_HOST}"
+          HOST="$(printf '%s' "$FTP_HOST" | tr -d '[:space:]')"
           HOST="${HOST#ftp://}"
           HOST="${HOST#ftps://}"
           HOST="${HOST%%/*}"
@@ -41,14 +42,16 @@ jobs:
             echo "::error::FTP_HOST secret kosong"
             exit 1
           fi
-          if ! getent hosts "$HOST" > /dev/null; then
-            echo "::error::FTP_HOST '$HOST' tidak ditemukan (ENOTFOUND)."
-            echo "Ambil hostname/IP yang benar di hPanel → Websites → FTP Accounts."
-            echo "Contoh benar: 185.123.45.67  atau  ftp.domain-anda.com"
-            echo "Contoh salah: id-dci-web1785  ssh host  https://domain.com"
+          if [[ "$HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "FTP host OK (IP): $HOST"
+          elif getent hosts "$HOST" > /dev/null 2>&1; then
+            echo "FTP host OK (hostname): $HOST"
+          else
+            echo "::error::FTP_HOST tidak valid (ENOTFOUND): '$HOST'"
+            echo "hPanel → FTP Accounts → FTP IP. Contoh: 46.202.138.30 (tanpa ftp://)"
             exit 1
           fi
-          echo "FTP host OK: $HOST"
+          echo "host=${HOST}" >> "$GITHUB_OUTPUT"
 
       - name: Normalize FTP server path
         id: ftp
@@ -69,7 +72,7 @@ jobs:
       - name: Upload frontend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ${{ steps.ftp_host.outputs.host }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
