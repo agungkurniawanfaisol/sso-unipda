@@ -16,6 +16,9 @@ Thumbs.db
 .env.production
 .env.deploy
 
+# Server-only deploy token (jangan commit)
+.deploy-token
+
 #doc jangan diupload ke github
 doc
 

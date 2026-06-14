@@ -28,32 +28,39 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
-
-      - name: Upload frontend dist
-        run: |
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.HOSTINGER_PORT }}" -o StrictHostKeyChecking=no \
-            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
-            "mkdir -p '${{ secrets.DEPLOY_PATH }}/frontend/dist'"
-
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no" \
-            frontend/dist/ \
-            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.DEPLOY_PATH }}/frontend/dist/"
-
-      - name: Deploy backend on server
-        uses: appleboy/ssh-action@v1.2.0
+      # Hostinger sering memblokir SSH dari IP GitHub Actions → pakai FTP
+      - name: Upload frontend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
-          script_stop: true
-          script: |
-            cd "${{ secrets.DEPLOY_PATH }}"
-            bash scripts/deploy.sh
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          local-dir: ./frontend/dist/
+          server-dir: ${{ secrets.FTP_DIST_DIR }}
+          dangerous-clean-slate: true
+
+      - name: Trigger Hostinger git pull
+        env:
+          WEBHOOK: ${{ secrets.HOSTINGER_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -n "$WEBHOOK" ]; then
+            curl -fsS -X POST "$WEBHOOK"
+            echo "Hostinger git pull triggered."
+          else
+            echo "HOSTINGER_DEPLOY_WEBHOOK not set — skip."
+          fi
+
+      - name: Trigger server deploy hook
+        env:
+          HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+          HOOK_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
+        run: |
+          if [ -n "$HOOK_URL" ] && [ -n "$HOOK_TOKEN" ]; then
+            curl -fsS -X POST \
+              -H "Authorization: Bearer $HOOK_TOKEN" \
+              "$HOOK_URL"
+            echo "deploy.sh triggered via HTTP."
+          else
+            echo "DEPLOY_HOOK_URL not set — jalankan bash scripts/deploy.sh manual di server."
+          fi
