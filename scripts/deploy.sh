@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy script — dijalankan di server Hostinger (via GitHub Actions atau manual).
+# Deploy script server-side — dijalankan di Hostinger (via GitHub Actions atau manual).
+# Frontend di-build di GitHub Actions, bukan di server.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -9,14 +10,6 @@ echo "==> Pull latest from main"
 git fetch origin main
 git reset --hard origin/main
 
-# Muat variabel deploy lokal (VITE_API_URL, dll.) — file ini tidak ada di Git
-if [[ -f "$ROOT/.env.deploy" ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$ROOT/.env.deploy"
-  set +a
-fi
-
 echo "==> Backend: composer install"
 cd "$ROOT/backend"
 composer install --no-dev --optimize-autoloader --no-interaction
@@ -25,14 +18,14 @@ echo "==> Backend: migrate & cache"
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
+# API-only: tidak ada Blade views — skip view:cache
 
-echo "==> Frontend: build"
-cd "$ROOT/frontend"
-npm ci --silent
-npm run build
+# Frontend dist di-upload dari GitHub Actions (npm tidak tersedia di shared hosting).
+if [[ ! -d "$ROOT/frontend/dist" ]] || [[ -z "$(ls -A "$ROOT/frontend/dist" 2>/dev/null)" ]]; then
+  echo "WARNING: frontend/dist kosong — pastikan GitHub Actions sudah upload build."
+fi
 
 # Opsional: salin build frontend ke folder public Laravel (aktifkan jika 1 domain)
-# rsync -a --delete dist/ "$ROOT/backend/public/"
+# rsync -a --delete "$ROOT/frontend/dist/" "$ROOT/backend/public/"
 
 echo "==> Deploy selesai ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))"
