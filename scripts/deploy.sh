@@ -30,12 +30,15 @@ php artisan config:cache
 php artisan route:cache
 # API-only: tidak ada Blade views — skip view:cache
 
-# Frontend dist di-upload dari GitHub Actions (npm tidak tersedia di shared hosting).
-if [[ ! -d "$ROOT/frontend/dist" ]] || [[ -z "$(ls -A "$ROOT/frontend/dist" 2>/dev/null)" ]]; then
+# Frontend dist di-upload GitHub Actions → frontend/dist, lalu dipublish ke public_html root.
+if [[ -d "$ROOT/frontend/dist" ]] && [[ -n "$(ls -A "$ROOT/frontend/dist" 2>/dev/null)" ]]; then
+  echo "==> Frontend: publish ke public_html root"
+  rsync -a "$ROOT/frontend/dist/" "$ROOT/"
+  if [[ -f "$ROOT/scripts/public_html.htaccess" ]]; then
+    cp "$ROOT/scripts/public_html.htaccess" "$ROOT/.htaccess"
+  fi
+else
   echo "WARNING: frontend/dist kosong — pastikan GitHub Actions sudah upload build."
 fi
-
-# Opsional: salin build frontend ke folder public Laravel (aktifkan jika 1 domain)
-# rsync -a --delete "$ROOT/frontend/dist/" "$ROOT/backend/public/"
 
 echo "==> Deploy selesai ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))"

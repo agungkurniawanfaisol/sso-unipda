@@ -1,0 +1,19 @@
+# Salin ke public_html/.htaccess (deploy.sh otomatis copy)
+# Satu domain: React di root + Laravel API di /api
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # API → Laravel (backend/public)
+    RewriteCond %{REQUEST_URI} ^/api(/.*)?$
+    RewriteRule ^ backend/public/index.php [L]
+
+    # File & folder yang ada (assets, gallery, backend, dll.)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # React Router — SPA fallback
+    RewriteRule ^ index.html [L]
+</IfModule>
