@@ -29,6 +29,22 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       # Hostinger sering memblokir SSH dari IP GitHub Actions → pakai FTP
+      - name: Normalize FTP server path
+        id: ftp
+        env:
+          FTP_DIST_DIR: ${{ secrets.FTP_DIST_DIR }}
+        run: |
+          DIR="${FTP_DIST_DIR}"
+          if [ -z "$DIR" ]; then
+            echo "::error::FTP_DIST_DIR secret is empty"
+            exit 1
+          fi
+          if [[ "$DIR" != */ ]]; then
+            DIR="${DIR}/"
+          fi
+          echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
+          echo "Using server-dir: ${DIR}"
+
       - name: Upload frontend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -37,7 +53,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           local-dir: ./frontend/dist/
-          server-dir: ${{ secrets.FTP_DIST_DIR }}
+          server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: true
 
       - name: Trigger Hostinger git pull
