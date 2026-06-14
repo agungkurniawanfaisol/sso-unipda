@@ -10,6 +10,7 @@ jobs:
   deploy:
     name: Build & deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -28,7 +29,6 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      # Hostinger sering memblokir SSH dari IP GitHub Actions → pakai FTP/FTPS
       - name: Normalize FTP host
         id: ftp_host
         env:
@@ -53,23 +53,64 @@ jobs:
           fi
           echo "host=${HOST}" >> "$GITHUB_OUTPUT"
 
-      - name: Normalize FTP server path
+      - name: Resolve document root path
         id: ftp
         env:
           FTP_DIST_DIR: ${{ secrets.FTP_DIST_DIR }}
         run: |
-          DIR="${FTP_DIST_DIR}"
-          if [ -z "$DIR" ]; then
-            echo "::error::FTP_DIST_DIR secret is empty"
-            exit 1
+          DIR="${FTP_DIST_DIR:-/public_html/}"
+          DIR="$(printf '%s' "$DIR" | tr -d '[:space:]')"
+          if [[ "$DIR" == */frontend/dist/ ]] || [[ "$DIR" == */frontend/dist ]]; then
+            DIR="${DIR%/frontend/dist*}/"
           fi
           if [[ "$DIR" != */ ]]; then
             DIR="${DIR}/"
           fi
           echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
-          echo "Using server-dir: ${DIR}"
+          echo "Publishing to document root: ${DIR}"
 
-      - name: Upload frontend via FTP
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Deploy frontend via FTPS (lftp + retry)
+        id: lftp_deploy
+        continue-on-error: true
+        env:
+          FTP_HOST: ${{ steps.ftp_host.outputs.host }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ steps.ftp.outputs.dir }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            echo "::group::FTPS upload attempt ${attempt}/4"
+            if lftp -u "${FTP_USER},${FTP_PASS}" "ftps://${FTP_HOST}:21" <<EOF
+          set ftp:ssl-force true
+          set ssl:verify-certificate no
+          set net:timeout 90
+          set net:max-retries 2
+          set net:reconnect-interval-base 5
+          lcd frontend/dist
+          cd ${FTP_DIR}
+          mirror -R --parallel=2 --verbose
+          bye
+          EOF
+            then
+              echo "FTPS upload succeeded on attempt ${attempt}"
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed, waiting 45s..."
+            echo "::endgroup::"
+            sleep 45
+          done
+          echo "::warning::lftp deploy failed after 4 attempts"
+          exit 1
+
+      - name: Deploy frontend via FTP-Deploy-Action (fallback FTPS)
+        id: ftp_ftps_fallback
+        if: steps.lftp_deploy.outcome == 'failure'
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ steps.ftp_host.outputs.host }}
@@ -81,40 +122,42 @@ jobs:
           local-dir: ./frontend/dist/
           server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: false
+          timeout: 300000
+          log-level: verbose
 
-      # Document root Hostinger = public_html. Jika FTP_DIST_DIR staging
-      # (mis. /public_html/frontend/dist/), publish juga ke root agar situs langsung update.
-      - name: Normalize document root path
-        id: webroot
-        env:
-          FTP_DIST_DIR: ${{ secrets.FTP_DIST_DIR }}
-        run: |
-          DIR="${FTP_DIST_DIR:-/public_html/}"
-          DIR="$(printf '%s' "$DIR" | tr -d '[:space:]')"
-          if [[ "$DIR" == */frontend/dist/ ]] || [[ "$DIR" == */frontend/dist ]]; then
-            WEBROOT="${DIR%/frontend/dist*}/"
-          else
-            WEBROOT="$DIR"
-          fi
-          if [[ "$WEBROOT" != */ ]]; then
-            WEBROOT="${WEBROOT}/"
-          fi
-          echo "dir=${WEBROOT}" >> "$GITHUB_OUTPUT"
-          echo "Publishing to document root: ${WEBROOT}"
-
-      - name: Publish frontend to document root
-        if: steps.ftp.outputs.dir != steps.webroot.outputs.dir
+      - name: Deploy frontend via plain FTP (last resort)
+        id: ftp_plain_fallback
+        if: steps.lftp_deploy.outcome == 'failure' && steps.ftp_ftps_fallback.outcome == 'failure'
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ steps.ftp_host.outputs.host }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
-          security: loose
           local-dir: ./frontend/dist/
-          server-dir: ${{ steps.webroot.outputs.dir }}
+          server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: false
+          timeout: 300000
+          log-level: verbose
+
+      - name: Verify deploy succeeded
+        run: |
+          if [ "${{ steps.lftp_deploy.outcome }}" = "success" ]; then
+            echo "Deploy OK (lftp)"
+            exit 0
+          fi
+          if [ "${{ steps.ftp_ftps_fallback.outcome }}" = "success" ]; then
+            echo "Deploy OK (FTP-Deploy FTPS)"
+            exit 0
+          fi
+          if [ "${{ steps.ftp_plain_fallback.outcome }}" = "success" ]; then
+            echo "Deploy OK (plain FTP)"
+            exit 0
+          fi
+          echo "::error::Semua metode FTP gagal. Cek FTP_HOST (pakai IP 46.202.138.30), username/password, dan apakah Hostinger memblokir IP GitHub Actions."
+          exit 1
 
       - name: Trigger Hostinger git pull
         env:
@@ -138,5 +181,5 @@ jobs:
               "$HOOK_URL"
             echo "deploy.sh triggered via HTTP."
           else
-            echo "DEPLOY_HOOK_URL not set — jalankan bash scripts/deploy.sh manual di server."
+            echo "DEPLOY_HOOK_URL not set — skip."
           fi
