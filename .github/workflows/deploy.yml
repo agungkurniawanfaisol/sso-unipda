@@ -80,7 +80,41 @@ jobs:
           security: loose
           local-dir: ./frontend/dist/
           server-dir: ${{ steps.ftp.outputs.dir }}
-          dangerous-clean-slate: true
+          dangerous-clean-slate: false
+
+      # Document root Hostinger = public_html. Jika FTP_DIST_DIR staging
+      # (mis. /public_html/frontend/dist/), publish juga ke root agar situs langsung update.
+      - name: Normalize document root path
+        id: webroot
+        env:
+          FTP_DIST_DIR: ${{ secrets.FTP_DIST_DIR }}
+        run: |
+          DIR="${FTP_DIST_DIR:-/public_html/}"
+          DIR="$(printf '%s' "$DIR" | tr -d '[:space:]')"
+          if [[ "$DIR" == */frontend/dist/ ]] || [[ "$DIR" == */frontend/dist ]]; then
+            WEBROOT="${DIR%/frontend/dist*}/"
+          else
+            WEBROOT="$DIR"
+          fi
+          if [[ "$WEBROOT" != */ ]]; then
+            WEBROOT="${WEBROOT}/"
+          fi
+          echo "dir=${WEBROOT}" >> "$GITHUB_OUTPUT"
+          echo "Publishing to document root: ${WEBROOT}"
+
+      - name: Publish frontend to document root
+        if: steps.ftp.outputs.dir != steps.webroot.outputs.dir
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ steps.ftp_host.outputs.host }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: loose
+          local-dir: ./frontend/dist/
+          server-dir: ${{ steps.webroot.outputs.dir }}
+          dangerous-clean-slate: false
 
       - name: Trigger Hostinger git pull
         env:
