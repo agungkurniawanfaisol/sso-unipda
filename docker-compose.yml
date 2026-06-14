@@ -1,0 +1,76 @@
+services:
+  # ────────────────────────────
+  # MySQL Database
+  # ────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: unipda-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: unipda
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_USER: unipda
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ────────────────────────────
+  # Laravel Backend API
+  # ────────────────────────────
+  backend:
+    image: serversideup/php:8.3-fpm-nginx
+    container_name: unipda-backend
+    restart: unless-stopped
+    environment:
+      APP_ENV: local
+      APP_DEBUG: true
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: unipda
+      DB_USERNAME: unipda
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "8000:8080"
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+    working_dir: /var/www/html
+    entrypoint: >
+      sh -c "
+        cp -n .env.example .env 2>/dev/null || true &&
+        composer install --no-interaction --prefer-dist 2>/dev/null &&
+        php artisan key:generate --force 2>/dev/null &&
+        php artisan migrate --seed --force 2>/dev/null &&
+        /entrypoint.sh
+      "
+
+  # ────────────────────────────
+  # React Frontend
+  # ────────────────────────────
+  frontend:
+    image: node:24-alpine
+    container_name: unipda-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: sh -c "npm install --silent && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
