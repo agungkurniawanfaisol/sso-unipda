@@ -14,7 +14,17 @@ echo "==> Backend: composer install"
 cd "$ROOT/backend"
 composer install --no-dev --optimize-autoloader --no-interaction
 
+echo "==> Backend: prepare storage directories"
+mkdir -p storage/framework/cache/data
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/framework/testing
+mkdir -p storage/app/public storage/app/private storage/logs bootstrap/cache
+mkdir -p resources/views
+chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
+
 echo "==> Backend: migrate & cache"
+php artisan config:clear 2>/dev/null || true
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
