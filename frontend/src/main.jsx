@@ -1,10 +1,20 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import 'lenis/dist/lenis.css'
 import App from './App.jsx'
+import { SmoothScrollProvider } from './providers/SmoothScrollProvider.jsx'
+import { VisitorModeProvider } from './providers/VisitorModeProvider.jsx'
+import { PortalSearchProvider } from './providers/PortalSearchProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <SmoothScrollProvider>
+      <VisitorModeProvider>
+        <PortalSearchProvider>
+          <App />
+        </PortalSearchProvider>
+      </VisitorModeProvider>
+    </SmoothScrollProvider>
   </StrictMode>,
 )

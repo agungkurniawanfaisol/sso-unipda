@@ -6,7 +6,7 @@ cleanup() {
     kill $SERVER_PID 2>/dev/null || true
     exit 0
 }
-trap cleanup SIGTERM SIGINT
+trap cleanup INT TERM
 
 # ── Setup ──────────────────────────────────────
 echo "📦 Installing PHP dependencies..."
@@ -19,6 +19,12 @@ fi
 # Create .env if missing and sync DB settings with compose environment
 if [ ! -f .env ]; then
     cp .env.example .env
+fi
+
+mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache resources/views
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+if ! grep -q '^APP_KEY=base64:' .env 2>/dev/null; then
     echo "🔑 Generating app key..."
     php artisan key:generate --force
 fi
@@ -46,10 +52,17 @@ php artisan serve --host=0.0.0.0 --port=8000 &
 SERVER_PID=$!
 
 echo "👀 Watching for file changes..."
+WATCH_DIRS=""
+for dir in ./app ./config ./routes ./database ./resources; do
+    if [ -d "$dir" ]; then
+        WATCH_DIRS="$WATCH_DIRS $dir"
+    fi
+done
+
 while true; do
     if ! inotifywait -r -e modify,create,delete,move \
         --exclude '(\.env|vendor/|storage/|bootstrap/cache/|node_modules/|\.git/)' \
-        ./app ./config ./routes ./database ./resources 2>&1; then
+        $WATCH_DIRS 2>&1; then
         sleep 2
         continue
     fi

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="800" y1="0" x2="0" y2="600" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#581c87"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect x="100" y="140" width="600" height="320" rx="20" fill="rgba(255,255,255,0.1)"/>
+  <rect x="140" y="180" width="520" height="40" rx="8" fill="rgba(255,255,255,0.16)"/>
+  <rect x="140" y="240" width="400" height="24" rx="6" fill="rgba(255,255,255,0.1)"/>
+  <text x="400" y="520" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="system-ui,sans-serif" font-size="22">Seminar Nasional</text>
+</svg>

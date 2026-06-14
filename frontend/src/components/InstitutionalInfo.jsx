@@ -1,97 +1,101 @@
-import { Lightbulb, Target, BookOpen, CheckCircle2, ArrowRight } from 'lucide-react'
-
-const standards = [
-  {
-    icon: BookOpen,
-    title: 'OBE-Based Curriculum',
-    description: 'Outcome-Based Education framework ensuring every graduate achieves measurable competencies aligned with industry needs.',
-  },
-  {
-    icon: Target,
-    title: 'KKNI Level 6',
-    description: 'Curriculum aligned with Indonesian National Qualifications Framework for bachelor-level competency standards.',
-  },
-  {
-    icon: CheckCircle2,
-    title: 'International Accreditation',
-    description: 'Program standards meeting international accreditation requirements for global recognition.',
-  },
-]
+import { Lightbulb, Target, ArrowRight } from 'lucide-react'
+import { api } from '@/lib/api'
+import { useFetch } from '@/hooks/useFetch'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { MagneticButton } from '@/components/ui/MagneticButton'
 
 export default function InstitutionalInfo() {
+  const { data, loading, error } = useFetch(() => api.getInstitutional(), [])
+  const visiMisi = data?.data?.visi_misi
+
   return (
-    <section id="about" className="py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        {/* Section Header */}
-        <div className="max-w-2xl mb-14">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-medium text-amber-300 mb-4">
-            About UNIPDA
-          </span>
-          <h2 className="text-section text-white mb-4">
-            Vision, Mission & Standards
-          </h2>
-          <p className="text-white/50 text-base leading-relaxed">
-            Our commitment to excellence in computer science education through
-            clear vision, actionable mission, and world-class standards.
+    <section id="about" className="chapter-accent-about chapter-section relative flex flex-col justify-center py-24">
+      <div className="section-divider absolute inset-x-0 top-0" />
+
+      <div className="relative mx-auto w-full max-w-7xl px-6">
+        <ScrollReveal>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            Profil
           </p>
+          <h2 className="font-display text-display-xl max-w-4xl text-white">
+            {visiMisi?.title ?? "Let's explore the portal"}
+          </h2>
+          <p className="text-editorial mt-8 max-w-2xl text-white/50">
+            {visiMisi?.subtitle ??
+              'Landasan akademik UNIPDA dalam mewujudkan pendidikan berkualitas, inovatif, dan berdampak bagi masyarakat.'}
+          </p>
+        </ScrollReveal>
+
+        {error && (
+          <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-sm text-amber-200">
+            Data institusi sementara tidak tersedia. Menampilkan konten fallback.
+          </div>
+        )}
+
+        <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+          <ScrollReveal>
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
+                <Lightbulb className="h-5 w-5 text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="font-display mb-4 text-xl font-semibold text-white">Visi</h3>
+                {loading ? (
+                  <div className="h-24 animate-pulse rounded-xl bg-white/5" />
+                ) : (
+                  <p className="text-editorial text-white/55">
+                    {visiMisi?.visi ??
+                      'Menjadi universitas unggulan yang menghasilkan lulusan berintegritas, inovatif, dan berdaya saing global.'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.08}>
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
+                <Target className="h-5 w-5 text-teal-400" />
+              </div>
+              <div>
+                <h3 className="font-display mb-4 text-xl font-semibold text-white">Misi</h3>
+                {loading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="h-4 animate-pulse rounded bg-white/5" />
+                    ))}
+                  </div>
+                ) : (
+                  <ul className="space-y-4">
+                    {(visiMisi?.misi ?? []).map((item, index) => (
+                      <li key={index} className="flex gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-xs font-bold text-teal-300">
+                          {index + 1}
+                        </span>
+                        <span className="text-editorial text-white/55">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
 
-        {/* Vision & Mission Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-          {/* Vision Card */}
-          <div className="rounded-2xl border border-white/[0.06] bg-gradient-to-br from-indigo-500/5 to-transparent p-8 hover:border-white/[0.12] transition-all duration-500">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/20">
-                <Lightbulb className="w-5 h-5 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white">Vision</h3>
-            </div>
-            <p className="text-white/60 leading-relaxed text-base">
-              To become a leading center of excellence in computer science education,
-              research, and innovation that produces globally competitive graduates
-              with strong ethical values and entrepreneurial spirit.
+        <ScrollReveal delay={0.15}>
+          <div className="mt-20 border-t border-white/[0.06] pt-16">
+            <p className="mb-8 text-sm uppercase tracking-[0.18em] text-white/35">
+              Mulai dari sini
             </p>
+            <MagneticButton
+              href="#applications"
+              className="group items-center gap-3 rounded-full border border-white/15 bg-white px-8 py-4 text-base font-semibold text-black hover:bg-white/90"
+            >
+              Jelajahi Aplikasi Kampus
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </MagneticButton>
           </div>
-
-          {/* Mission Card */}
-          <div className="rounded-2xl border border-white/[0.06] bg-gradient-to-br from-emerald-500/5 to-transparent p-8 hover:border-white/[0.12] transition-all duration-500">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-500/20">
-                <Target className="w-5 h-5 text-emerald-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-white">Mission</h3>
-            </div>
-            <ul className="space-y-3">
-              {[
-                'Deliver high-quality education through innovative teaching methods and industry-aligned curriculum.',
-                'Foster cutting-edge research and community service that addresses real-world challenges.',
-                'Develop graduates with strong character, leadership skills, and technological competency.',
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-white/60 text-sm leading-relaxed">
-                  <ArrowRight className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Standards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {standards.map((standard) => {
-            const Icon = standard.icon
-            return (
-              <div
-                key={standard.title}
-                className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-500"
-              >
-                <Icon className="w-6 h-6 text-amber-400 mb-4" />
-                <h3 className="text-base font-semibold text-white mb-2">{standard.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{standard.description}</p>
-              </div>
-            )
-          })}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   )

@@ -8,25 +8,27 @@ A full-stack web application showcasing software applications built by the unive
 
 ## 🚀 Quick Start
 
-### Development Mode (with hot reload)
+### Docker (recommended — hot reload enabled)
 
 ```bash
-# Docker (recommended — all services at once)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+docker compose up -d
 
 # Services:
-# - Frontend:  http://localhost:5173   (HMR enabled — instant updates on save)
+# - Frontend:  http://localhost:5173   (HMR — instant updates on save)
 # - Backend:   http://localhost:8000   (auto-reloads on file changes)
 # - MySQL:     localhost:3306
 
 # View logs:
-docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+docker compose logs -f
 
 # Stop:
-docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+docker compose down
+
+# Rebuild backend image (after Dockerfile changes):
+docker compose build --no-cache backend
 ```
 
-#### Dev mode features
+#### Dev features (default)
 | Feature | Frontend | Backend |
 |---------|----------|---------|
 | Hot reload | ✅ Vite HMR (WebSocket) | ✅ inotifywait auto-restart |
@@ -35,18 +37,14 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 ---
 
-### Standard Mode (without dev overrides)
+### Prod-like Mode (no hot reload)
 
-Without `-f docker-compose.dev.yml`, the services run without hot reload or auto-restart.
-The frontend still uses Vite dev server (HMR disabled, no polling).
+For Nginx + PHP-FPM without auto-restart:
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.prod.yml up -d
 
-# Services:
-# - Frontend:  http://localhost:5173  (Vite dev, no HMR)
-# - Backend:   http://localhost:8000
-# - MySQL:     localhost:3306
+# Same ports: frontend :5173, backend :8000, mysql :3306
 ```
 
 ### Production Build
@@ -62,7 +60,7 @@ cd frontend && npm run build
 npx serve frontend/dist -l 3000
 
 # Or use the backend's Nginx to serve both API and frontend
-# (see docker-compose.prod.yml — not yet created)
+# (see docker-compose.prod.yml)
 ```
 
 ---
@@ -105,8 +103,8 @@ php artisan serve
 ### File structure
 
 ```
-docker-compose.yml          # Base services (MySQL, prod-like backend, frontend)
-docker-compose.dev.yml      # Dev overrides (hot reload, file watching)
+docker-compose.yml          # Default dev setup (hot reload enabled)
+docker-compose.prod.yml     # Prod-like setup (Nginx + PHP-FPM, no hot reload)
 backend/docker/
 ├── Dockerfile.dev          # Dev image with Composer + inotify-tools pre-installed
 └── dev-entrypoint.sh       # Dev entrypoint with file watcher + auto-reload
@@ -116,11 +114,11 @@ backend/docker/
 
 | Command | What it does |
 |---------|-------------|
-| `docker compose up -d` | Start in production mode |
-| `docker compose -f compose.yml -f compose.dev.yml up -d` | Start in dev mode |
+| `docker compose up -d` | Start dev mode with hot reload |
+| `docker compose -f docker-compose.prod.yml up -d` | Start prod-like mode |
 | `docker compose down` | Stop all services |
 | `docker compose logs -f` | Follow logs |
-| `docker compose -f compose.yml -f compose.dev.yml build --no-cache backend` | Rebuild backend image |
+| `docker compose build --no-cache backend` | Rebuild backend dev image |
 | `docker compose exec backend bash` | Shell into backend container |
 | `docker compose exec frontend sh` | Shell into frontend container |
 
@@ -165,8 +163,8 @@ SSO/
 │   ├── docker/                  # Dev Dockerfile + entrypoint
 │   └── composer.json
 │
-├── docker-compose.yml           # Docker base config
-├── docker-compose.dev.yml       # Docker dev overrides
+├── docker-compose.yml           # Docker dev config (hot reload)
+├── docker-compose.prod.yml      # Docker prod-like config
 ├── .env                         # Docker environment variables
 ├── README.md
 ├── memory.md                    # Project context & decisions

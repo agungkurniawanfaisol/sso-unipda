@@ -1,0 +1,22 @@
+{
+  "faculties": [
+    {
+      "id": "fip",
+      "name": "Fakultas Ilmu Pendidikan",
+      "short_name": "FIP",
+      "description": "Menyiapkan pendidik dan tenaga kependidikan profesional berintegritas, berdaya saing, dan berbasis teknologi.",
+      "accent": "amber",
+      "profile_link": "https://universitaspgridelta.ac.id/",
+      "programs": ["Pendidikan Guru SD", "Pendidikan Bahasa Inggris", "Pendidikan Matematika"]
+    },
+    {
+      "id": "saintek",
+      "name": "Fakultas Sains dan Teknologi",
+      "short_name": "Saintek",
+      "description": "Mencetak talenta digital melalui informatika, sistem informasi, dan statistika berbasis riset dan industri.",
+      "accent": "indigo",
+      "profile_link": "https://saintek.universitaspgridelta.ac.id/",
+      "programs": ["Informatika", "Sistem Informasi", "Statistika"]
+    }
+  ]
+}

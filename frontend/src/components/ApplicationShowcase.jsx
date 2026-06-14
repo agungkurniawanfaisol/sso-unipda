@@ -1,195 +1,205 @@
-import { useState } from 'react'
-import { Monitor, Smartphone, Cpu, Gauge, Wifi, Filter, ExternalLink, User } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  Monitor,
+  Filter,
+  ArrowUpRight,
+} from 'lucide-react'
+import { api } from '@/lib/api'
+import { useFetch } from '@/hooks/useFetch'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { cn } from '@/lib/utils'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useHorizontalSpotlight } from '@/hooks/useHorizontalSpotlight'
+import {
+  CARD_GRADIENTS,
+  FACULTY_LABELS,
+  getAppIcon,
+} from '@/components/apps/appShared'
 
 const categories = [
-  { id: 'all', label: 'All Apps', icon: Filter },
+  { id: 'all', label: 'Semua', icon: Filter },
   { id: 'web', label: 'Web', icon: Monitor },
-  { id: 'mobile', label: 'Mobile', icon: Smartphone },
-  { id: 'iot', label: 'IoT', icon: Cpu },
-  { id: 'arduino', label: 'Arduino', icon: Gauge },
-  { id: 'network', label: 'Network', icon: Wifi },
 ]
 
-const applications = [
-  {
-    id: 1,
-    title: 'E-Learning Platform',
-    description: 'Online learning management system with real-time collaboration features.',
-    category: 'web',
-    thumbnail: null,
-    creator: 'Tim Pengembang',
-    creatorType: 'Student',
-    color: 'from-blue-600 to-cyan-500',
-  },
-  {
-    id: 2,
-    title: 'Smart Campus App',
-    description: 'Mobile application for campus navigation, schedules, and academic info.',
-    category: 'mobile',
-    thumbnail: null,
-    creator: 'Riset & Tim Mobile',
-    creatorType: 'Student',
-    color: 'from-purple-600 to-pink-500',
-  },
-  {
-    id: 3,
-    title: 'IoT Weather Station',
-    description: 'Real-time weather monitoring system using distributed sensor networks.',
-    category: 'iot',
-    thumbnail: null,
-    creator: 'Lab IoT',
-    creatorType: 'Student',
-    color: 'from-emerald-600 to-teal-500',
-  },
-  {
-    id: 4,
-    title: 'Greenhouse Controller',
-    description: 'Arduino-based automated greenhouse monitoring and control system.',
-    category: 'arduino',
-    thumbnail: null,
-    creator: 'Tim Embedded Systems',
-    creatorType: 'Student',
-    color: 'from-amber-600 to-orange-500',
-  },
-  {
-    id: 5,
-    title: 'Digital Library',
-    description: 'Web-based digital library with search, borrow, and e-book support.',
-    category: 'web',
-    thumbnail: null,
-    creator: 'Tim Perpustakaan Digital',
-    creatorType: 'Lecturer',
-    color: 'from-rose-600 to-red-500',
-  },
-  {
-    id: 6,
-    title: 'Network Monitor',
-    description: 'Network traffic analysis and monitoring dashboard for campus infrastructure.',
-    category: 'network',
-    thumbnail: null,
-    creator: 'Tim Infrastruktur',
-    creatorType: 'Student',
-    color: 'from-indigo-600 to-violet-500',
-  },
-  {
-    id: 7,
-    title: 'Siakad Mobile',
-    description: 'Mobile academic information system for students and faculty.',
-    category: 'mobile',
-    thumbnail: null,
-    creator: 'Tim SIAKAD',
-    creatorType: 'Lecturer',
-    color: 'from-sky-600 to-blue-500',
-  },
-  {
-    id: 8,
-    title: 'Smart Parking System',
-    description: 'IoT-based smart parking with real-time slot availability detection.',
-    category: 'iot',
-    thumbnail: null,
-    creator: 'Tim Riset IoT',
-    creatorType: 'Student',
-    color: 'from-lime-600 to-green-500',
-  },
-]
+function buildTags(app) {
+  const tags = []
+  if (app.category) tags.push(categories.find((c) => c.id === app.category)?.label ?? app.category)
+  if (app.faculty) tags.push(FACULTY_LABELS[app.faculty] ?? app.faculty)
+  tags.push('UNIPDA')
+  return tags
+}
 
 export default function ApplicationShowcase() {
+  const reelRef = useRef(null)
   const [activeCategory, setActiveCategory] = useState('all')
+  const reducedMotion = usePrefersReducedMotion()
+  const params = useMemo(
+    () => (activeCategory === 'all' ? {} : { category: activeCategory }),
+    [activeCategory]
+  )
 
-  const filteredApps = activeCategory === 'all'
-    ? applications
-    : applications.filter((app) => app.category === activeCategory)
+  const { data, loading, error } = useFetch(() => api.getApplications(params), [activeCategory])
+  const applications = data?.data ?? []
+  const activeIndex = useHorizontalSpotlight(
+    reelRef,
+    applications.length,
+    !reducedMotion && applications.length > 0
+  )
 
   return (
-    <section id="applications" className="py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        {/* Section Header */}
-        <div className="max-w-2xl mb-14">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-300 mb-4">
-            Showcase
-          </span>
-          <h2 className="text-section text-white mb-4">
-            Application Showcase
-          </h2>
-          <p className="text-white/50 text-base leading-relaxed">
-            Explore applications built by our talented students and faculty members
-            across various categories and technologies.
+    <section id="applications" className="chapter-accent-apps chapter-section relative flex flex-col justify-center py-24">
+      <div className="section-divider absolute inset-x-0 top-0" />
+
+      <div className="relative mx-auto w-full max-w-7xl px-6">
+        <ScrollReveal>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            Featured Work
           </p>
-        </div>
+          <h2 className="font-display text-display-xl max-w-3xl text-white">
+            Ekosistem Digital Kampus
+          </h2>
+        </ScrollReveal>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-10">
-          {categories.map((cat) => {
-            const Icon = cat.icon
-            const isActive = activeCategory === cat.id
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? 'bg-white text-black shadow-lg'
-                    : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {cat.label}
-              </button>
-            )
-          })}
-        </div>
+        <ScrollReveal delay={0.05}>
+          <div className="mb-8 mt-8 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => {
+                const Icon = cat.icon
+                const isActive = activeCategory === cat.id
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={cn(
+                      'inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300',
+                      isActive
+                        ? 'bg-white text-black'
+                        : 'border border-white/[0.08] bg-white/[0.03] text-white/55 hover:border-white/15 hover:text-white'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {cat.label}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="hidden text-xs uppercase tracking-[0.18em] text-white/30 md:block">
+              Scroll / drag to explore
+            </p>
+          </div>
+        </ScrollReveal>
 
-        {/* Apps Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredApps.map((app) => (
-            <article
-              key={app.id}
-              className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-500"
+        {error && (
+          <div className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-sm text-amber-200">
+            Data aplikasi sementara tidak tersedia.
+          </div>
+        )}
+
+        {loading && (
+          <div className="horizontal-reel px-0">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="horizontal-reel-item glass-card h-[min(70vh,520px)] animate-pulse rounded-3xl" />
+            ))}
+          </div>
+        )}
+
+        {!loading && applications.length === 0 && (
+          <div className="glass-card rounded-2xl px-5 py-12 text-center text-white/45">
+            Tidak ada aplikasi untuk kategori ini.
+          </div>
+        )}
+
+        {!loading && applications.length > 0 && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCategory}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
             >
-              {/* Thumbnail */}
-              <div className="relative aspect-video bg-gradient-to-br from-white/5 to-white/[0.02] overflow-hidden">
-                {app.thumbnail ? (
-                  <img
-                    src={app.thumbnail}
-                    alt={app.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${app.color} opacity-40`}>
-                    <Monitor className="w-10 h-10 text-white/40" />
-                  </div>
-                )}
-                {/* Category badge */}
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-[10px] font-medium text-white/80 border border-white/10">
-                  {categories.find((c) => c.id === app.category)?.label}
-                </span>
-              </div>
+              <div ref={reelRef} className="horizontal-reel -mx-6 px-6 pb-4 md:-mx-0 md:px-0">
+                {applications.map((app, index) => {
+                  const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length]
+                  const AppIcon = getAppIcon(app.id)
+                  const tags = buildTags(app)
+                  const isSpotlight = index === activeIndex
 
-              {/* Info */}
-              <div className="p-5">
-                <h3 className="text-headline text-white mb-1.5">{app.title}</h3>
-                <p className="text-sm text-white/40 line-clamp-2 mb-4 leading-relaxed">
-                  {app.description}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10">
-                      <User className="w-3 h-3 text-white/60" />
-                    </div>
-                    <span className="text-xs text-white/40">{app.creator}</span>
-                  </div>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                    app.creatorType === 'Lecturer'
-                      ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
-                      : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/20'
-                  }`}>
-                    {app.creatorType}
-                  </span>
-                </div>
+                  return (
+                    <motion.article
+                      key={app.id ?? index}
+                      data-reel-item
+                      animate={
+                        reducedMotion
+                          ? undefined
+                          : {
+                              scale: isSpotlight ? 1.04 : 0.93,
+                              opacity: isSpotlight ? 1 : 0.5,
+                              filter: isSpotlight
+                                ? 'blur(0px) saturate(1)'
+                                : 'blur(3px) saturate(0.55)',
+                            }
+                      }
+                      transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+                      className={cn(
+                        'horizontal-reel-item group relative flex h-[min(70vh,520px)] flex-col overflow-hidden rounded-3xl border bg-white/[0.02] transition-shadow duration-500',
+                        isSpotlight
+                          ? 'border-white/15 shadow-[0_24px_48px_rgba(0,0,0,0.35)]'
+                          : 'border-white/[0.06]'
+                      )}
+                    >
+                      <div className="relative flex flex-1 items-end overflow-hidden">
+                        {app.image_url ? (
+                          <img
+                            src={app.image_url}
+                            alt={app.title}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div
+                            className={cn(
+                              'absolute inset-0 flex items-center justify-center bg-gradient-to-br',
+                              gradient
+                            )}
+                          >
+                            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-black/20 backdrop-blur-sm">
+                              <AppIcon className="h-10 w-10 text-white/70" />
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/40 to-transparent" />
+
+                        <div className="relative w-full p-8 md:p-10">
+                          <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.12em] text-white/50">
+                            {tags.join(' • ')}
+                          </p>
+                          <h3 className="font-display text-3xl font-semibold text-white md:text-4xl">
+                            {app.title}
+                          </h3>
+                          <p className="text-editorial mt-3 max-w-lg text-white/55">
+                            {app.description}
+                          </p>
+                          {app.profile_link && (
+                            <a
+                              href={app.profile_link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/[0.12]"
+                            >
+                              Buka Aplikasi
+                              <ArrowUpRight className="h-4 w-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </motion.article>
+                  )
+                })}
               </div>
-            </article>
-          ))}
-        </div>
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </section>
   )

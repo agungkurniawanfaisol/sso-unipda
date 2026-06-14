@@ -22,12 +22,19 @@ services:
       retries: 5
 
   # ────────────────────────────
-  # Laravel Backend API
+  # Laravel Backend API (dev mode with auto-reload)
   # ────────────────────────────
   backend:
-    image: serversideup/php:8.3-fpm-nginx
+    build:
+      context: ./backend
+      dockerfile: docker/Dockerfile.dev
     container_name: unipda-backend
     restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
     environment:
       APP_ENV: local
       APP_DEBUG: true
@@ -38,25 +45,12 @@ services:
       DB_DATABASE: unipda
       DB_USERNAME: unipda
       DB_PASSWORD: ${DB_PASSWORD:-secret}
-    ports:
-      - "8000:8080"
-    volumes:
-      - ./backend:/var/www/html
     depends_on:
       mysql:
         condition: service_healthy
-    working_dir: /var/www/html
-    entrypoint: >
-      sh -c "
-        cp -n .env.example .env 2>/dev/null || true &&
-        composer install --no-interaction --prefer-dist 2>/dev/null &&
-        php artisan key:generate --force 2>/dev/null &&
-        php artisan migrate --seed --force 2>/dev/null &&
-        /entrypoint.sh
-      "
 
   # ────────────────────────────
-  # React Frontend
+  # React Frontend (dev mode with HMR)
   # ────────────────────────────
   frontend:
     image: node:24-alpine
@@ -68,6 +62,9 @@ services:
       - ./frontend:/app
       - /app/node_modules
     working_dir: /app
+    environment:
+      - CHOKIDAR_USEPOLLING=1
+      - WATCHPACK_POLLING=true
     command: sh -c "npm install --silent && npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend

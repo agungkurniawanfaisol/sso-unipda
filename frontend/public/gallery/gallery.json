@@ -1,0 +1,60 @@
+{
+  "title": "Galeri Kampus",
+  "subtitle": "Momen kegiatan, fasilitas, dan kehidupan UNIPDA",
+  "categories": [
+    { "id": "all", "label": "Semua" },
+    { "id": "kampus", "label": "Kampus" },
+    { "id": "kegiatan", "label": "Kegiatan" },
+    { "id": "akademik", "label": "Akademik" }
+  ],
+  "items": [
+    {
+      "id": "campus-1",
+      "title": "Gedung Utama UNIPDA",
+      "caption": "Pintu gerbang kampus Universitas PGRI Delta, Sidoarjo.",
+      "category": "kampus",
+      "image": "/gallery/images/campus-1.svg",
+      "featured": true
+    },
+    {
+      "id": "campus-2",
+      "title": "Ruang Kuliah",
+      "caption": "Ruang perkuliahan modern untuk mahasiswa FIP dan Saintek.",
+      "category": "kampus",
+      "image": "/gallery/images/campus-2.svg",
+      "featured": false
+    },
+    {
+      "id": "event-1",
+      "title": "Wisuda Mahasiswa",
+      "caption": "Prosesi wisuda angkatan terbaru UNIPDA.",
+      "category": "kegiatan",
+      "image": "/gallery/images/event-1.svg",
+      "featured": true
+    },
+    {
+      "id": "event-2",
+      "title": "Seminar Nasional",
+      "caption": "Kegiatan seminar dan workshop bersama praktisi.",
+      "category": "kegiatan",
+      "image": "/gallery/images/event-2.svg",
+      "featured": false
+    },
+    {
+      "id": "academic-1",
+      "title": "Praktikum Saintek",
+      "caption": "Sesi praktikum laboratorium Fakultas Sains dan Teknologi.",
+      "category": "akademik",
+      "image": "/gallery/images/academic-1.svg",
+      "featured": false
+    },
+    {
+      "id": "academic-2",
+      "title": "Kuliah Umum FIP",
+      "caption": "Kuliah umum dan diskusi akademik Fakultas Ilmu Pendidikan.",
+      "category": "akademik",
+      "image": "/gallery/images/academic-2.svg",
+      "featured": false
+    }
+  ]
+}

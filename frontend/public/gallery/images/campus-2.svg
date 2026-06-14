@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="600" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#4338ca"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect x="80" y="120" width="640" height="360" rx="16" fill="rgba(255,255,255,0.08)"/>
+  <rect x="120" y="160" width="560" height="280" rx="8" fill="rgba(255,255,255,0.14)"/>
+  <circle cx="400" cy="300" r="60" fill="rgba(255,255,255,0.1)"/>
+  <text x="400" y="520" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="system-ui,sans-serif" font-size="22">Ruang Kuliah</text>
+</svg>

@@ -2,4 +2,5 @@
 vendor
 node_modules
 .env
-docker
+docker/*
+!docker/dev-entrypoint.sh

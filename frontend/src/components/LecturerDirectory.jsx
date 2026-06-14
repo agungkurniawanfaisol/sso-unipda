@@ -1,135 +1,143 @@
-import { ExternalLink, BookOpen, Award, Globe } from 'lucide-react'
-
-const lecturers = [
-  {
-    id: 1,
-    name: 'Dr. Ahmad Fauzi',
-    credentials: 'S.Kom., M.Kom.',
-    specializations: ['Laravel', 'React', 'AI'],
-    scholarLink: '#',
-    image: null,
-    bio: 'Expert in web development and artificial intelligence with 15+ years of teaching experience.',
-    color: 'from-indigo-500 to-blue-600',
-  },
-  {
-    id: 2,
-    name: 'Dr. Siti Nurhaliza',
-    credentials: 'S.T., M.T.',
-    specializations: ['IoT', 'Embedded Systems', 'Arduino'],
-    scholarLink: '#',
-    image: null,
-    bio: 'Specializes in Internet of Things and embedded system design for smart environments.',
-    color: 'from-emerald-500 to-teal-600',
-  },
-  {
-    id: 3,
-    name: 'Bambang Suprapto',
-    credentials: 'S.Kom., M.Kom.',
-    specializations: ['Mobile Dev', 'Flutter', 'UI/UX'],
-    scholarLink: '#',
-    image: null,
-    bio: 'Mobile application development expert with focus on cross-platform solutions.',
-    color: 'from-purple-500 to-pink-600',
-  },
-  {
-    id: 4,
-    name: 'Dr. Dewi Sartika',
-    credentials: 'S.Si., M.Sc.',
-    specializations: ['Data Science', 'Machine Learning', 'Python'],
-    scholarLink: '#',
-    image: null,
-    bio: 'Data science researcher focused on machine learning applications in education.',
-    color: 'from-amber-500 to-orange-600',
-  },
-  {
-    id: 5,
-    name: 'Rudi Hartono',
-    credentials: 'S.Kom., M.Kom.',
-    specializations: ['DevOps', 'Cloud', 'Kubernetes'],
-    scholarLink: '#',
-    image: null,
-    bio: 'Cloud infrastructure and DevOps specialist managing campus digital infrastructure.',
-    color: 'from-cyan-500 to-blue-600',
-  },
-  {
-    id: 6,
-    name: 'Dr. Maya Indah',
-    credentials: 'S.T., M.T.',
-    specializations: ['Cyber Security', 'Network', 'Cryptography'],
-    scholarLink: '#',
-    image: null,
-    bio: 'Cybersecurity expert with research focus on network security and cryptography.',
-    color: 'from-rose-500 to-red-600',
-  },
-]
+import { useMemo, useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowUpRight } from 'lucide-react'
+import { api } from '@/lib/api'
+import { useFetch } from '@/hooks/useFetch'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { cn } from '@/lib/utils'
+import { prefetch, cacheKey } from '@/lib/apiCache'
+import { LecturerCard } from '@/components/lecturers/LecturerCard'
+import { FACULTY_TABS } from '@/components/lecturers/lecturerShared'
 
 export default function LecturerDirectory() {
+  const [activeFaculty, setActiveFaculty] = useState('saintek')
+  const activeTab = FACULTY_TABS.find((tab) => tab.id === activeFaculty) ?? FACULTY_TABS[0]
+  const params = useMemo(() => activeTab.params, [activeTab])
+  const lecturerCacheKey = cacheKey('/lecturers', activeTab.params)
+
+  const prefetchTab = (tab) => {
+    prefetch(cacheKey('/lecturers', tab.params), () => api.getLecturers(tab.params))
+  }
+
+  const { data, loading, error } = useFetch(
+    () => api.getLecturers(params),
+    [activeFaculty],
+    { cacheKey: lecturerCacheKey }
+  )
+  const lecturers = data?.data ?? []
+  const total = data?.meta?.total ?? lecturers.length
+
+  useEffect(() => {
+    FACULTY_TABS.forEach((tab) => {
+      if (tab.id !== activeFaculty) {
+        prefetchTab(tab)
+      }
+    })
+  }, [activeFaculty])
+
   return (
-    <section id="lecturers" className="py-28 bg-[#08080e]">
-      <div className="mx-auto max-w-7xl px-6">
-        {/* Section Header */}
-        <div className="max-w-2xl mb-14">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-300 mb-4">
-            Faculty
-          </span>
-          <h2 className="text-section text-white mb-4">
-            Meet Our Lecturers
-          </h2>
-          <p className="text-white/50 text-base leading-relaxed">
-            Our dedicated faculty members bring expertise across computer science
-            disciplines, driving innovation in research and education.
+    <section id="lecturers" className="chapter-accent-lecturers chapter-section relative flex flex-col justify-center py-24">
+      <div className="section-divider absolute inset-x-0 top-0" />
+
+      <div className="relative mx-auto w-full max-w-7xl px-6">
+        <ScrollReveal>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            SDM
           </p>
-        </div>
+          <h2 className="font-display text-display-xl max-w-3xl text-white">
+            Tim Dosen UNIPDA
+          </h2>
+          <p className="text-editorial mt-6 max-w-2xl text-white/45">
+            Data dosen FIP diambil live dari AcaNova Office. Saintek ditampilkan dari portal fakultas.
+          </p>
+        </ScrollReveal>
 
-        {/* Lecturers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {lecturers.map((lecturer) => (
-            <div
-              key={lecturer.id}
-              className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-500"
-            >
-              {/* Avatar placeholder */}
-              <div className="relative w-16 h-16 rounded-full overflow-hidden mb-5">
-                {lecturer.image ? (
-                  <img src={lecturer.image} alt={lecturer.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${lecturer.color} flex items-center justify-center`}>
-                    <span className="text-xl font-bold text-white">
-                      {lecturer.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Name & Credentials */}
-              <h3 className="text-lg font-semibold text-white mb-1">{lecturer.name}</h3>
-              <p className="text-sm text-indigo-300/70 mb-2">{lecturer.credentials}</p>
-              <p className="text-sm text-white/40 leading-relaxed mb-4">{lecturer.bio}</p>
-
-              {/* Specializations */}
-              <div className="flex flex-wrap gap-1.5 mb-5">
-                {lecturer.specializations.map((spec) => (
-                  <span
-                    key={spec}
-                    className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/60"
+        <ScrollReveal delay={0.05}>
+          <div className="mb-8 mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {FACULTY_TABS.map((tab) => {
+                const isActive = activeFaculty === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveFaculty(tab.id)}
+                    onMouseEnter={() => prefetchTab(tab)}
+                    onFocus={() => prefetchTab(tab)}
+                    className={cn(
+                      'inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-all duration-300',
+                      isActive
+                        ? 'bg-white text-black'
+                        : 'border border-white/[0.08] bg-white/[0.03] text-white/55 hover:border-white/15 hover:text-white'
+                    )}
                   >
-                    {spec}
-                  </span>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <a
-                href={lecturer.scholarLink}
-                className="inline-flex items-center gap-2 text-xs font-medium text-white/40 hover:text-indigo-300 transition-colors duration-200 group/link"
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                Academic Profile
-                <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform" />
-              </a>
+                    {tab.label}
+                  </button>
+                )
+              })}
             </div>
-          ))}
-        </div>
+
+            <Link
+              to="/dosen"
+              className="inline-flex items-center gap-2 text-sm font-medium text-white/45 transition-colors hover:text-teal-300"
+            >
+              Lihat semua dosen
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </ScrollReveal>
+
+        {!loading && !error && (
+          <p className="mb-6 text-sm text-white/40">
+            Menampilkan <span className="font-semibold text-white/70">{total}</span> dosen —{' '}
+            {activeTab.title}
+          </p>
+        )}
+
+        {error && (
+          <div className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-sm text-amber-200">
+            Data dosen sementara tidak tersedia. Silakan coba lagi nanti.
+          </div>
+        )}
+
+        {loading && (
+          <div className="horizontal-reel">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="horizontal-reel-item glass-card h-80 animate-pulse rounded-3xl" />
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeFaculty}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35 }}
+            >
+              {lecturers.length === 0 ? (
+                <div className="glass-card rounded-2xl px-5 py-12 text-center text-white/45">
+                  Belum ada data dosen yang dapat ditampilkan.
+                </div>
+              ) : (
+                <div className="horizontal-reel -mx-6 px-6 pb-4 md:-mx-0 md:px-0">
+                  {lecturers.map((lecturer, index) => (
+                    <LecturerCard
+                      key={lecturer.id ?? lecturer.public_ref ?? index}
+                      lecturer={lecturer}
+                      facultyId={activeFaculty}
+                      index={index}
+                      layout="strip"
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </section>
   )

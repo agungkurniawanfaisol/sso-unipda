@@ -1,0 +1,81 @@
+{
+  "applications": [
+    {
+      "id": "acanova-office",
+      "title": "AcaNova Office",
+      "description": "Platform Academic Innovation terintegrasi — kepegawaian, akademik, payroll, presensi, dan manajemen SDM kampus.",
+      "category": "web",
+      "faculty": "universitas",
+      "profile_link": "https://office.universitaspgridelta.ac.id/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": true
+    },
+    {
+      "id": "sia-unipda",
+      "title": "SIA UNIPDA",
+      "description": "Sistem Informasi Akademik — KRS, nilai, transkrip, dan administrasi akademik mahasiswa & dosen.",
+      "category": "web",
+      "faculty": "universitas",
+      "profile_link": "https://sia.universitaspgridelta.ac.id/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": true
+    },
+    {
+      "id": "website-unipda",
+      "title": "Website UNIPDA",
+      "description": "Portal utama Universitas PGRI Delta Sidoarjo — informasi kampus, pendaftaran, dan layanan akademik.",
+      "category": "web",
+      "faculty": "universitas",
+      "profile_link": "https://universitaspgridelta.ac.id/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": true
+    },
+    {
+      "id": "portal-saintek",
+      "title": "Portal Saintek",
+      "description": "Website resmi Fakultas Sains dan Teknologi — program studi, berita, kegiatan, dan profil dosen.",
+      "category": "web",
+      "faculty": "saintek",
+      "profile_link": "https://saintek.universitaspgridelta.ac.id/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": false
+    },
+    {
+      "id": "pmb-unipda",
+      "title": "PMB UNIPDA",
+      "description": "Penerimaan Mahasiswa Baru — jalur pendaftaran, program studi, dan biaya kuliah.",
+      "category": "web",
+      "faculty": "universitas",
+      "profile_link": "https://pmb.universitaspgridelta.ac.id/pmb/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": false
+    },
+    {
+      "id": "brader-unipda",
+      "title": "Brader UNIPDA",
+      "description": "Platform Brader Universitas PGRI Delta — layanan dan informasi kampus terintegrasi.",
+      "category": "web",
+      "faculty": "universitas",
+      "profile_link": "https://brader.universitaspgridelta.ac.id/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": false
+    },
+    {
+      "id": "gamifikasi-unipda",
+      "title": "Gamifikasi UNIPDA",
+      "description": "Platform gamifikasi pembelajaran UNIPDA — interaksi, poin, dan engagement akademik.",
+      "category": "web",
+      "faculty": "universitas",
+      "profile_link": "https://gamifikasi.universitaspgridelta.ac.id/",
+      "creator_type": "lecturer",
+      "image_url": null,
+      "featured": false
+    }
+  ]
+}

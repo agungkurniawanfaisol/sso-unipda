@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7c2d12"/>
+      <stop offset="1" stop-color="#b45309"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <ellipse cx="400" cy="280" rx="220" ry="80" fill="rgba(255,255,255,0.12)"/>
+  <rect x="180" y="360" width="440" height="12" rx="6" fill="rgba(255,255,255,0.2)"/>
+  <text x="400" y="520" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-family="system-ui,sans-serif" font-size="22">Wisuda Mahasiswa</text>
+</svg>
