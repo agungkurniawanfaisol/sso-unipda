@@ -28,7 +28,28 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      # Hostinger sering memblokir SSH dari IP GitHub Actions → pakai FTP
+      # Hostinger sering memblokir SSH dari IP GitHub Actions → pakai FTP/FTPS
+      - name: Validate FTP host DNS
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+        run: |
+          HOST="${FTP_HOST}"
+          HOST="${HOST#ftp://}"
+          HOST="${HOST#ftps://}"
+          HOST="${HOST%%/*}"
+          if [ -z "$HOST" ]; then
+            echo "::error::FTP_HOST secret kosong"
+            exit 1
+          fi
+          if ! getent hosts "$HOST" > /dev/null; then
+            echo "::error::FTP_HOST '$HOST' tidak ditemukan (ENOTFOUND)."
+            echo "Ambil hostname/IP yang benar di hPanel → Websites → FTP Accounts."
+            echo "Contoh benar: 185.123.45.67  atau  ftp.domain-anda.com"
+            echo "Contoh salah: id-dci-web1785  ssh host  https://domain.com"
+            exit 1
+          fi
+          echo "FTP host OK: $HOST"
+
       - name: Normalize FTP server path
         id: ftp
         env:
@@ -51,7 +72,9 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
           port: 21
+          security: loose
           local-dir: ./frontend/dist/
           server-dir: ${{ steps.ftp.outputs.dir }}
           dangerous-clean-slate: true
