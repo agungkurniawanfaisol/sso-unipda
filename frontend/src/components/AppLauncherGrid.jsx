@@ -79,7 +79,7 @@ function AppTileBase({ app, index, className, children, size = 'md' }) {
   )
 }
 
-function HeroAppTile({ app, index, isPrimary }) {
+function HeroAppTile({ app, index, isPrimary, className }) {
   const AppIcon = getAppIcon(app.id)
   const theme = getAppTheme(app.id)
   const description = getShortDescription(app)
@@ -89,7 +89,10 @@ function HeroAppTile({ app, index, isPrimary }) {
       app={app}
       index={index}
       size="hero"
-      className="col-span-2 min-h-[180px] sm:col-span-2 sm:min-h-[168px] lg:col-span-2 lg:row-span-2 lg:min-h-[260px]"
+      className={cn(
+        'col-span-2 min-h-[180px] sm:col-span-2 sm:min-h-[168px] lg:col-span-2 lg:row-span-2 lg:min-h-[260px]',
+        className
+      )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-black/25 backdrop-blur-md shadow-lg">
@@ -192,11 +195,13 @@ function SkeletonTile({ className }) {
   )
 }
 
-export default function AppLauncherGrid({ className }) {
+export default function AppLauncherGrid({ className, variant = 'default' }) {
   const { mode } = useVisitorMode()
   const { data, loading, error } = useFetch(() => api.getApplications(), [], {
     cacheKey: APPS_CACHE_KEY,
   })
+
+  const isSidebar = variant === 'sidebar'
 
   const applications = useMemo(() => {
     const items = data?.data?.length ? data.data : error ? FALLBACK_APPS : []
@@ -209,7 +214,22 @@ export default function AppLauncherGrid({ className }) {
 
   return (
     <div id="applications" className={cn('scroll-mt-24', className)}>
-      {loading && (
+      {loading && isSidebar && (
+        <div className="flex flex-col gap-2.5">
+          <SkeletonTile className="min-h-[168px]" />
+          <div className="grid grid-cols-2 gap-2.5">
+            <SkeletonTile className="min-h-[120px]" />
+            <SkeletonTile className="min-h-[120px]" />
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <SkeletonTile key={index} className="min-h-[96px]" />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {loading && !isSidebar && (
         <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:grid-rows-2">
           <SkeletonTile className="col-span-2 min-h-[168px] lg:row-span-2 lg:min-h-[260px]" />
           <SkeletonTile className="min-h-[132px]" />
@@ -226,7 +246,34 @@ export default function AppLauncherGrid({ className }) {
         </p>
       )}
 
-      {!loading && applications.length > 0 && (
+      {!loading && applications.length > 0 && isSidebar && (
+        <div className="flex flex-col gap-2.5 sm:gap-3">
+          {heroApp && (
+            <HeroAppTile
+              app={heroApp}
+              index={0}
+              isPrimary
+              className="col-span-1 min-h-[168px] sm:min-h-[180px]"
+            />
+          )}
+          {featuredApps.length > 0 && (
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              {featuredApps.map((app, index) => (
+                <FeaturedAppTile key={app.id ?? index} app={app} index={index + 1} />
+              ))}
+            </div>
+          )}
+          {compactApps.length > 0 && (
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              {compactApps.map((app, index) => (
+                <CompactAppTile key={app.id ?? index} app={app} index={index + 3} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {!loading && applications.length > 0 && !isSidebar && (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:grid-rows-2">
             {heroApp && <HeroAppTile app={heroApp} index={0} isPrimary />}

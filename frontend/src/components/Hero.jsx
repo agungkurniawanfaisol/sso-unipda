@@ -184,7 +184,8 @@ export default function Hero() {
           className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-[#050508]/60 via-transparent to-transparent"
         />
         <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-t from-[#050508] via-[#050508]/55 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 z-[3] hidden bg-gradient-to-r from-[#050508]/80 via-[#050508]/35 to-transparent md:block md:max-w-[58%]" />
+        <div className="pointer-events-none absolute inset-0 z-[3] hidden bg-gradient-to-r from-[#050508]/85 via-[#050508]/25 to-transparent md:block md:max-w-[52%]" />
+        <div className="pointer-events-none absolute inset-0 z-[3] hidden bg-gradient-to-l from-[#050508]/70 via-[#050508]/20 to-transparent md:block md:ml-auto md:max-w-[48%]" />
 
         <Spotlight className="-top-40 left-1/2 -translate-x-1/2 md:-top-20" fill="white" />
         {!reducedMotion && mountSpline && phase !== 'boot' && (
@@ -214,60 +215,94 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="flex min-h-0 flex-col max-md:h-auto md:h-full"
+                className="flex min-h-0 flex-col max-md:h-auto md:h-full md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,420px)] md:items-stretch md:gap-x-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,460px)] lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,500px)]"
               >
-                <motion.div
-                  variants={headlineContainer}
-                  initial="hidden"
-                  animate="visible"
-                  className="mb-5 md:mb-6"
-                >
-                  <motion.p
-                    variants={headlineItem}
-                    className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-indigo-300/70"
+                {/* Left: intro & actions */}
+                <div className="flex min-h-0 flex-col justify-center md:max-w-xl md:pr-2">
+                  <motion.div
+                    variants={headlineContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="mb-5 md:mb-6"
                   >
-                    Interactive 3D · UNIPDA
-                  </motion.p>
-                  <motion.h1 className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
-                    <motion.span variants={headlineItem} className="inline">
-                      Unipda{' '}
-                    </motion.span>
-                    <motion.span variants={headlineItem} className="inline">
-                      <ShimmerText>Portal</ShimmerText>
-                    </motion.span>
-                  </motion.h1>
-                  <motion.p
-                    variants={headlineItem}
-                    className="text-editorial mt-2 max-w-xl text-sm text-white/50 md:text-base"
+                    <motion.p
+                      variants={headlineItem}
+                      className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-indigo-300/70"
+                    >
+                      Interactive 3D · UNIPDA
+                    </motion.p>
+                    <motion.h1 className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
+                      <motion.span variants={headlineItem} className="inline">
+                        Unipda{' '}
+                      </motion.span>
+                      <motion.span variants={headlineItem} className="inline">
+                        <ShimmerText>Portal</ShimmerText>
+                      </motion.span>
+                    </motion.h1>
+                    <motion.p
+                      variants={headlineItem}
+                      className="text-editorial mt-2 max-w-xl text-sm text-white/50 md:text-base"
+                    >
+                      {MODE_COPY[mode]}
+                    </motion.p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.12, duration: 0.45 }}
+                    className="mb-4 md:mb-6"
                   >
-                    {MODE_COPY[mode]}
-                  </motion.p>
-                </motion.div>
+                    <VisitorModeSwitcher />
+                  </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.12, duration: 0.45 }}
-                  className="mb-4 md:mb-5"
-                >
-                  <VisitorModeSwitcher />
-                </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.45 }}
+                    className="hidden shrink-0 flex-wrap items-center gap-3 border-t border-white/[0.06] pt-5 md:flex"
+                  >
+                    <MagneticButton
+                      type="button"
+                      onClick={openSearch}
+                      className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/[0.1]"
+                    >
+                      <Search className="h-4 w-4 shrink-0" />
+                      <span className="whitespace-nowrap">Cari layanan</span>
+                      <span className="shrink-0 rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-white/40">
+                        ⌘K
+                      </span>
+                    </MagneticButton>
 
+                    <a
+                      href="#campus-today"
+                      className="inline-flex min-h-11 items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-white/40 transition-colors hover:text-white/70"
+                    >
+                      Jelajahi kampus
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </a>
+                  </motion.div>
+                </div>
+
+                {/* Right: app launcher panel (desktop) / stacked below (mobile) */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="max-md:flex-none md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:pb-0"
+                  className="mt-2 flex min-h-0 flex-col max-md:flex-none md:mt-0 md:min-h-[min(560px,calc(100svh-10rem))] md:max-h-[calc(100svh-8rem)] md:overflow-hidden md:rounded-2xl md:border md:border-white/10 md:bg-[#050508]/72 md:p-4 md:shadow-[0_24px_80px_-24px_rgba(0,0,0,0.75)] md:backdrop-blur-xl md:supports-[backdrop-filter]:bg-[#050508]/58 lg:p-5"
                 >
-                  <RotatingServiceHint className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35" />
-                  <AppLauncherGrid />
+                  <RotatingServiceHint className="mb-3 shrink-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35" />
+                  <div className="min-h-0 flex-1 overflow-visible max-md:overflow-visible md:overflow-y-auto md:overscroll-contain md:pr-1">
+                    <AppLauncherGrid variant="sidebar" className="md:scroll-mt-0" />
+                  </div>
                 </motion.div>
 
+                {/* Mobile-only footer actions */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.45 }}
-                  className="mt-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4 max-md:justify-center md:mt-5 md:pt-5"
+                  className="mt-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4 max-md:justify-center md:hidden"
                 >
                   <MagneticButton
                     type="button"
