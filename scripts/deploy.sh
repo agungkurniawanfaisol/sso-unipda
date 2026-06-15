@@ -30,8 +30,10 @@ php artisan config:cache
 php artisan route:cache
 # API-only: tidak ada Blade views — skip view:cache
 
-# Frontend dist di-upload GitHub Actions → frontend/dist, lalu dipublish ke public_html root.
-if [[ -d "$ROOT/frontend/dist" ]] && [[ -n "$(ls -A "$ROOT/frontend/dist" 2>/dev/null)" ]]; then
+# Frontend dist: di-upload via deploy.php (zip) atau ada di repo setelah git pull.
+if [[ "${BACKEND_ONLY:-}" == "1" ]]; then
+  echo "==> Frontend publish skipped (BACKEND_ONLY)"
+elif [[ -d "$ROOT/frontend/dist" ]] && [[ -n "$(ls -A "$ROOT/frontend/dist" 2>/dev/null)" ]]; then
   echo "==> Frontend: publish ke public_html root"
   rsync -a "$ROOT/frontend/dist/" "$ROOT/"
   if [[ -f "$ROOT/scripts/public_html.htaccess" ]]; then

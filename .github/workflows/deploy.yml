@@ -10,7 +10,7 @@ jobs:
   deploy:
     name: Build & deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -29,157 +29,80 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Normalize FTP host
-        id: ftp_host
+      # Hostinger memblokir FTP dari IP GitHub Actions → deploy via HTTP webhook
+      - name: Deploy via HTTP webhook
+        id: http_deploy
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+          DEPLOY_HOOK_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DEPLOY_HOOK_URL}" ] || [ -z "${DEPLOY_HOOK_TOKEN}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "DEPLOY_HOOK_URL / DEPLOY_HOOK_TOKEN belum diset — skip HTTP deploy."
+            exit 0
+          fi
+
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+          echo "Packaging frontend/dist..."
+          (cd frontend/dist && zip -r -q ../../dist.zip .)
+
+          echo "Uploading to ${DEPLOY_HOOK_URL} ..."
+          for attempt in 1 2 3; do
+            echo "::group::HTTP deploy attempt ${attempt}/3"
+            if curl -fsS --max-time 600 --retry 2 --retry-delay 10 \
+              -X POST \
+              -H "Authorization: Bearer ${DEPLOY_HOOK_TOKEN}" \
+              -H "Content-Type: application/zip" \
+              --data-binary @dist.zip \
+              "${DEPLOY_HOOK_URL}"; then
+              echo ""
+              echo "::endgroup::"
+              echo "HTTP deploy succeeded on attempt ${attempt}"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed, waiting 30s..."
+            echo "::endgroup::"
+            sleep 30
+          done
+
+          echo "::error::HTTP deploy gagal setelah 3 percobaan"
+          exit 1
+
+      - name: Deploy via FTP (fallback, sering diblokir Hostinger)
+        if: steps.http_deploy.outputs.configured != 'true'
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_DIST_DIR: ${{ secrets.FTP_DIST_DIR }}
         run: |
+          set -euo pipefail
+          if [ -z "${FTP_HOST}" ] || [ -z "${FTP_USERNAME}" ] || [ -z "${FTP_PASSWORD}" ]; then
+            echo "::error::Set DEPLOY_HOOK_URL + DEPLOY_HOOK_TOKEN (disarankan), atau FTP secrets."
+            echo "Lihat .env.deploy.example untuk setup deploy.php di server."
+            exit 1
+          fi
+
           HOST="$(printf '%s' "$FTP_HOST" | tr -d '[:space:]')"
           HOST="${HOST#ftp://}"
           HOST="${HOST#ftps://}"
           HOST="${HOST%%/*}"
-          if [ -z "$HOST" ]; then
-            echo "::error::FTP_HOST secret kosong"
-            exit 1
-          fi
-          if [[ "$HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "FTP host OK (IP): $HOST"
-          elif getent hosts "$HOST" > /dev/null 2>&1; then
-            echo "FTP host OK (hostname): $HOST"
-          else
-            echo "::error::FTP_HOST tidak valid (ENOTFOUND): '$HOST'"
-            echo "hPanel → FTP Accounts → FTP IP. Contoh: 46.202.138.30 (tanpa ftp://)"
-            exit 1
-          fi
-          echo "host=${HOST}" >> "$GITHUB_OUTPUT"
 
-      - name: Resolve document root path
-        id: ftp
-        env:
-          FTP_DIST_DIR: ${{ secrets.FTP_DIST_DIR }}
-        run: |
           DIR="${FTP_DIST_DIR:-/public_html/}"
           DIR="$(printf '%s' "$DIR" | tr -d '[:space:]')"
           if [[ "$DIR" == */frontend/dist/ ]] || [[ "$DIR" == */frontend/dist ]]; then
             DIR="${DIR%/frontend/dist*}/"
           fi
-          if [[ "$DIR" != */ ]]; then
-            DIR="${DIR}/"
-          fi
-          echo "dir=${DIR}" >> "$GITHUB_OUTPUT"
-          echo "Publishing to document root: ${DIR}"
+          [[ "$DIR" == */ ]] || DIR="${DIR}/"
 
-      - name: Install lftp
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
-
-      - name: Deploy frontend via FTPS (lftp + retry)
-        id: lftp_deploy
-        continue-on-error: true
-        env:
-          FTP_HOST: ${{ steps.ftp_host.outputs.host }}
-          FTP_USER: ${{ secrets.FTP_USERNAME }}
-          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_DIR: ${{ steps.ftp.outputs.dir }}
-        run: |
-          set -euo pipefail
-          for attempt in 1 2 3 4; do
-            echo "::group::FTPS upload attempt ${attempt}/4"
-            if lftp -u "${FTP_USER},${FTP_PASS}" "ftps://${FTP_HOST}:21" <<EOF
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+          lftp -u "${FTP_USERNAME},${FTP_PASSWORD}" "ftps://${HOST}:21" <<EOF
           set ftp:ssl-force true
           set ssl:verify-certificate no
-          set net:timeout 90
-          set net:max-retries 2
-          set net:reconnect-interval-base 5
+          set net:timeout 60
           lcd frontend/dist
-          cd ${FTP_DIR}
-          mirror -R --parallel=2 --verbose
+          cd ${DIR}
+          mirror -R --parallel=2
           bye
           EOF
-            then
-              echo "FTPS upload succeeded on attempt ${attempt}"
-              echo "::endgroup::"
-              exit 0
-            fi
-            echo "Attempt ${attempt} failed, waiting 45s..."
-            echo "::endgroup::"
-            sleep 45
-          done
-          echo "::warning::lftp deploy failed after 4 attempts"
-          exit 1
-
-      - name: Deploy frontend via FTP-Deploy-Action (fallback FTPS)
-        id: ftp_ftps_fallback
-        if: steps.lftp_deploy.outcome == 'failure'
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ steps.ftp_host.outputs.host }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: loose
-          local-dir: ./frontend/dist/
-          server-dir: ${{ steps.ftp.outputs.dir }}
-          dangerous-clean-slate: false
-          timeout: 300000
-          log-level: verbose
-
-      - name: Deploy frontend via plain FTP (last resort)
-        id: ftp_plain_fallback
-        if: steps.lftp_deploy.outcome == 'failure' && steps.ftp_ftps_fallback.outcome == 'failure'
-        continue-on-error: true
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ steps.ftp_host.outputs.host }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: ./frontend/dist/
-          server-dir: ${{ steps.ftp.outputs.dir }}
-          dangerous-clean-slate: false
-          timeout: 300000
-          log-level: verbose
-
-      - name: Verify deploy succeeded
-        run: |
-          if [ "${{ steps.lftp_deploy.outcome }}" = "success" ]; then
-            echo "Deploy OK (lftp)"
-            exit 0
-          fi
-          if [ "${{ steps.ftp_ftps_fallback.outcome }}" = "success" ]; then
-            echo "Deploy OK (FTP-Deploy FTPS)"
-            exit 0
-          fi
-          if [ "${{ steps.ftp_plain_fallback.outcome }}" = "success" ]; then
-            echo "Deploy OK (plain FTP)"
-            exit 0
-          fi
-          echo "::error::Semua metode FTP gagal. Cek FTP_HOST (pakai IP 46.202.138.30), username/password, dan apakah Hostinger memblokir IP GitHub Actions."
-          exit 1
-
-      - name: Trigger Hostinger git pull
-        env:
-          WEBHOOK: ${{ secrets.HOSTINGER_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -n "$WEBHOOK" ]; then
-            curl -fsS -X POST "$WEBHOOK"
-            echo "Hostinger git pull triggered."
-          else
-            echo "HOSTINGER_DEPLOY_WEBHOOK not set — skip."
-          fi
-
-      - name: Trigger server deploy hook
-        env:
-          HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
-          HOOK_TOKEN: ${{ secrets.DEPLOY_HOOK_TOKEN }}
-        run: |
-          if [ -n "$HOOK_URL" ] && [ -n "$HOOK_TOKEN" ]; then
-            curl -fsS -X POST \
-              -H "Authorization: Bearer $HOOK_TOKEN" \
-              "$HOOK_URL"
-            echo "deploy.sh triggered via HTTP."
-          else
-            echo "DEPLOY_HOOK_URL not set — skip."
-          fi
